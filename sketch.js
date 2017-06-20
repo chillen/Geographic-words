@@ -10,6 +10,11 @@ var canvas;
 var points;
 var globalCanvas;
 var clickPoints = [];
+var mapImages = {};
+var activeMap = 'biome';
+var mapOffset = {'x':0, 'y':0};
+var easing = 0.1;
+var dragging = false;
 
 function setup() {
     globalCanvas = createCanvas(W, H);
@@ -18,15 +23,16 @@ function setup() {
     graphView = createGraphics(graphWidth, graphHeight);
     canvas = createImage(W, H);
     setupData();
-    setTimeout(setupSizes, 1)
-    cursor(CROSS)
+    canvas = mapImages[activeMap];
+    setupData();
+    setTimeout(setupSizes, 1);
+    cursor(CROSS);
 }
 
 function setupSizes() {
     H = document.getElementById('wrap-wrap').getBoundingClientRect().height;
     W = document.getElementById('wrap-wrap').getBoundingClientRect().width;
     mainWidth = W-graphWidth;
-    canvas.resize(W, H);
     setupData();
     resizeCanvas(W, H);
     mainView.resizeCanvas(mainWidth, H);
@@ -34,6 +40,7 @@ function setupSizes() {
 }
 
 function setupData() {
+    setupMaps();
     setupPoints();
     updateFields();
     drawData();
@@ -50,7 +57,8 @@ function draw() {
 function drawMain() {
     var m = mainView;
     m.background(bgColor);
-    m.image(canvas, 0, 0);
+    moveMap();
+    m.image(canvas, mapOffset.x, mapOffset.y);
     drawPoints();
     drawClicks();
     drawLine();
@@ -105,8 +113,14 @@ function drawPoints() {
     mainView.noStroke();
     points.forEach(function(p) { 
         mainView.fill(p.colour);
-        mainView.ellipse(p.x, p.y, 20, 20)
+        mainView.ellipse(p.x, p.y, 20, 20);
      })
+}
+
+function setupMaps() {
+    mapImages['biome'] = loadImage("data/biomeMap.png");
+    mapImages['height'] = loadImage("data/heightMap.png");
+    mapImages['moisture'] = loadImage("data/moistureMap.png");
 }
 
 function setupCanvas() {
@@ -166,10 +180,16 @@ function windowResized() {
 
 // MOUSE DRAGGING HANDLING BELOW
 function mouseDragged() {
-    if (mouseX > mainWidth || mouseY > H || mouseX < 0 || mouseY < 0) {
-        return;
+    if (keyIsDown(SHIFT)) {
+        dragging = true;
     }
-    clickPoints[1] = [mouseX, mouseY]
+    else {
+        if (mouseX > mainWidth || mouseY > H || mouseX < 0 || mouseY < 0) {
+            return;
+        }
+        if (clickPoints.length == 2)
+            clickPoints[1] = [mouseX, mouseY]
+    }
 }
 
 function mousePressed() {
@@ -177,12 +197,15 @@ function mousePressed() {
         return
     }
     if (mouseButton == LEFT) {
-        clickPoints = [ [mouseX, mouseY], [mouseX, mouseY] ];
+        clickPoints = [ [mouseX, mouseY] ];
+        if (!keyIsDown(SHIFT)) 
+            clickPoints.push([mouseX, mouseY]);
     }
 }
 
 function drawClicks() {
     crossLength = 5
+    if (clickPoints.length < 2) return;
     clickPoints.forEach(function(p) {
         mainView.strokeWeight(1);
         mainView.stroke(0);
@@ -224,3 +247,24 @@ function pointsBetween(points) {
    return linePoints;
 }
 
+// DOM Controls
+function swapMap(type) {
+    activeMap = type;
+    canvas = mapImages[activeMap];
+}
+
+function moveMap() {
+    if (!dragging) return;
+    if (dragging && !mouseIsPressed) {
+        dragging = false;
+        return;
+    }
+    mapOffset.x += (mouseX - clickPoints[0][0])*easing;
+    mapOffset.y += (mouseY - clickPoints[0][1])*easing;
+}
+
+function mouseClicked() {
+    if (!keyIsDown(CONTROL)) return;
+    var loc = {'x': mouseX - mapOffset.x, 'y': mouseY - mapOffset.y};
+    console.log(loc);
+}
