@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/p5.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="models.js"></script>
+    <script src="sketch.js"></script>
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+  <style> body {padding: 0; margin: 0;} </style>
+  </head>
+  <body id="body">
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+      <div class="mdl-layout__drawer" id="menu">
+        <span class="mdl-layout-title">Procedural POI</span>
+        <p>In this demo, you can explore various influence fields being 
+          generated around provided points of interest. Click and drag to
+          examine the values of the field on the top right graph.
+        </p>
+        <nav class="mdl-navigation">
+          <!--<a class="mdl-navigation__link" href="">Link</a>
+          <a class="mdl-navigation__link" href="">Link</a>
+          <a class="mdl-navigation__link" href="">Link</a>
+          <a class="mdl-navigation__link" href="">Link</a>-->
+        </nav>
+      </div>
+      <main class="mdl-layout__content" id="wrap-wrap">
+        <div class="page-content" id="sketch-wrapper">
+          <div id="sketch">
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- The below code allows you to use a locally installed livereload -->
+    <script>
+      document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] +
+      ':35729/livereload.js?snipver=1"></' + 'script>')
+    </script> 
+  </body>
+</html>
+
