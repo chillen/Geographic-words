@@ -15,12 +15,14 @@ var activeMap = 'biome';
 var mapOffset = {'x':0, 'y':0};
 var easing = 0.1;
 var dragging = false;
+var dataView;
 
 function setup() {
     globalCanvas = createCanvas(W, H);
     globalCanvas.parent('sketch');
     mainView = createGraphics(W,H);
     graphView = createGraphics(graphWidth, graphHeight);
+    dataView = createGraphics(W, H);
     canvas = createImage(W, H);
     setupData();
     canvas = mapImages[activeMap];
@@ -36,7 +38,8 @@ function setupSizes() {
     setupData();
     resizeCanvas(W, H);
     mainView.resizeCanvas(mainWidth, H);
-    graphView.resizeCanvas(graphWidth, graphHeight)
+    graphView.resizeCanvas(graphWidth, graphHeight);
+    dataView.resizeCanvas(mainWidth, H);
 }
 
 function setupData() {
@@ -48,23 +51,29 @@ function setupData() {
 
 function draw() {
     background(0);
-    drawMain();
-    drawGraph();
+    drawMainView();
+    drawGraphView();
+    drawDataView();
     image(mainView, 0, 0);
     image(graphView, mainWidth, 0);
+    image(dataView, 0, 0);
 }
 
-function drawMain() {
+function drawMainView() {
     var m = mainView;
     m.background(bgColor);
     moveMap();
     m.image(canvas, mapOffset.x, mapOffset.y);
+}
+
+function drawDataView() {
+    dataView.clear();
     drawPoints();
     drawClicks();
     drawLine();
 }
 
-function drawGraph() {
+function drawGraphView() {
     var g = graphView;
     g.background([0,0,0, 255]);
     g.stroke([40, 40, 40, 255]);
@@ -94,7 +103,7 @@ function drawGraphData(field, curvePoints) {
     var i = 0;
     var g = graphView;
     curvePoints = curvePoints.map(function(p) {
-        return [i++, map(field.data[p[0]][p[1]], 0, 255, graphHeight, 0)];
+        return [i++, map(field.data[p[0]-Math.round(mapOffset.x)][p[1]-Math.round(mapOffset.y)], 0, 255, graphHeight, 0)];
     });
     g.stroke(field.colour);
     g.strokeWeight(2);
@@ -109,11 +118,11 @@ function drawGraphData(field, curvePoints) {
 }
 
 function drawPoints() {
-    mainView.ellipseMode(CENTER);
-    mainView.noStroke();
+    dataView.ellipseMode(CENTER);
+    dataView.noStroke();
     points.forEach(function(p) { 
-        mainView.fill(p.colour);
-        mainView.ellipse(p.x, p.y, 20, 20);
+        dataView.fill(p.colour);
+        dataView.ellipse(p.x+mapOffset.x, p.y+mapOffset.y, 20, 20);
      })
 }
 
