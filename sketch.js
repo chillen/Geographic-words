@@ -6,7 +6,6 @@ var graphView;
 var graphHeight = 200;
 var graphWidth = 400;
 var mainWidth = W-graphWidth;
-var canvas;
 var points;
 var globalCanvas;
 var clickPoints = [];
@@ -16,6 +15,7 @@ var mapOffset = {'x':0, 'y':0};
 var easing = 0.1;
 var dragging = false;
 var dataView;
+var setupComplete = false;
 
 function setup() {
     globalCanvas = createCanvas(W, H);
@@ -23,9 +23,6 @@ function setup() {
     mainView = createGraphics(W,H);
     graphView = createGraphics(graphWidth, graphHeight);
     dataView = createGraphics(W, H);
-    canvas = createImage(W, H);
-    setupData();
-    canvas = mapImages[activeMap];
     setupData();
     setTimeout(setupSizes, 1);
     cursor(CROSS);
@@ -35,7 +32,6 @@ function setupSizes() {
     H = document.getElementById('wrap-wrap').getBoundingClientRect().height;
     W = document.getElementById('wrap-wrap').getBoundingClientRect().width;
     mainWidth = W-graphWidth;
-    setupData();
     resizeCanvas(W, H);
     mainView.resizeCanvas(mainWidth, H);
     graphView.resizeCanvas(graphWidth, graphHeight);
@@ -43,13 +39,15 @@ function setupSizes() {
 }
 
 function setupData() {
-    setupMaps();
-    setupPoints();
-    updateFields();
-    drawData();
+    setupMaps(function() {
+        setupPoints();
+        updateFields();
+        setupComplete = true;
+    });
 }
 
 function draw() {
+    if (!setupComplete) return;
     background(0);
     drawMainView();
     drawGraphView();
@@ -63,7 +61,7 @@ function drawMainView() {
     var m = mainView;
     m.background(bgColor);
     moveMap();
-    m.image(canvas, mapOffset.x, mapOffset.y);
+    m.image(mapImages[activeMap], mapOffset.x, mapOffset.y);
 }
 
 function drawDataView() {
@@ -71,6 +69,7 @@ function drawDataView() {
     drawPoints();
     drawClicks();
     drawLine();
+    drawData();
 }
 
 function drawGraphView() {
@@ -126,61 +125,59 @@ function drawPoints() {
      })
 }
 
-function setupMaps() {
-    mapImages['biome'] = loadImage("data/biomeMap.png");
-    mapImages['height'] = loadImage("data/heightMap.png");
-    mapImages['moisture'] = loadImage("data/moistureMap.png");
-}
-
-function setupCanvas() {
-    canvas.loadPixels();
-    for (var x = 0; x < canvas.width; x++) {
-        for (var y = 0; y < canvas.height; y++) {
-            canvas.set(x, y, bgColor)
-        }
-    }
-    canvas.updatePixels()
+function setupMaps(callback) {
+    mapImages['biome'] = loadImage("data/biomeMap.png", function() {
+        mapImages['height'] = loadImage("data/heightMap.png", function() {
+                mapImages['moisture'] = loadImage("data/moistureMap.png", function(m) {
+                    mapImages['size'] = {'height': m.height, 'width': m.width};
+                    callback();
+                });
+        });
+    });
 }
 
 function setupPoints() {
     points = [];
-    points.push(new Location(mainWidth/2, H/2, [50,100,70,255]));
-    var i = [ [70, 1000] ]
-    points[points.length - 1].addField("green", [50,100,70,255], 500, 255, i);
-
-    points.push(new Location(mainWidth/2-80, H/2-140, [50,50,100,255]));
-    var i = [ [200, -255], [200, 500] ]
-    points[points.length - 1].addField("green", [50,50,100,255], 300, 255, i);
+    // Lakes
+    var lakes = [];
+    lakes.push({'x': 577, 'y': 1077});
+    lakes.push({'x': 573, 'y': 1131});
+    lakes.push({'x': 636, 'y': 1107});
+    lakes.push({'x': 1140, 'y': 292});
+    lakes.forEach(function(p) {
+        points.push(new Location(p.x, p.y, [100, 100, 200, 255]));
+        points[points.length - 1].addField("lake", [100, 100, 200, 255], 500, 255);
+    });
 }
 
 function updateFields() {
     points.forEach(function(point) {
         point.fields.forEach(function(field) {
-            field.emit(W, H);
+            field.emit(mapImages.size.width, mapImages.size.height);
+            console.log(field.data.length);
         });
     });
 }
 
 function drawData() {
-    setupCanvas();
-    this.canvas.loadPixels();
-    points.forEach(function (point) {
-        point.fields.forEach(function(field) {
-            for (var i = 0; i < this.canvas.pixels.length; i+=4) {
-                var x = Math.floor(i / 4) % W;
-                var y = Math.floor(Math.floor(i / 4) / W);
-                if (field.x - field.radius < x && x < field.x + field.radius) {
-                    if (field.y - field.radius < y && y < field.y + field.radius) {
-                        this.canvas.pixels[i] += (field.colour[0] / 255) * field.data[x][y];
-                        this.canvas.pixels[i+1] += (field.colour[1] / 255) * field.data[x][y];
-                        this.canvas.pixels[i+2] += (field.colour[2] / 255) * field.data[x][y];
-                        this.canvas.pixels[i+3] = 255
-                    }
-                }
-            }
-        });
-    });
-    canvas.updatePixels()
+    // dataView.loadPixels();
+    // points.forEach(function (point) {
+    //     point.fields.forEach(function(field) {
+    //         for (var i = 0; i < dataView.pixels.length; i+=4) {
+    //             var x = Math.floor(i / 4) % dataView.width - Math.round(mapOffset.x);
+    //             var y = Math.floor(Math.floor(i / 4) / dataView.width  - Math.round(mapOffset.y));
+    //             if (field.x - field.radius < x && x < field.x + field.radius) {
+    //                 if (field.y - field.radius < y && y < field.y + field.radius) {
+    //                     dataView.pixels[i] += (field.colour[0] / 255) * field.data[x][y];
+    //                     dataView.pixels[i+1] += (field.colour[1] / 255) * field.data[x][y];
+    //                     dataView.pixels[i+2] += (field.colour[2] / 255) * field.data[x][y];
+    //                     dataView.pixels[i+3] = 255
+    //                 }
+    //             }
+    //         }
+    //     });
+    // });
+    // dataView.updatePixels()
 }
 
 function windowResized() {
@@ -259,7 +256,6 @@ function pointsBetween(points) {
 // DOM Controls
 function swapMap(type) {
     activeMap = type;
-    canvas = mapImages[activeMap];
 }
 
 function moveMap() {
@@ -274,6 +270,6 @@ function moveMap() {
 
 function mouseClicked() {
     if (!keyIsDown(CONTROL)) return;
-    var loc = {'x': mouseX - mapOffset.x, 'y': mouseY - mapOffset.y};
+    var loc = {'\'x\'': Math.round(mouseX - mapOffset.x), '\'y\'': Math.round(mouseY - mapOffset.y)};
     console.log(loc);
 }
