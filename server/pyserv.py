@@ -6,6 +6,7 @@ import time
 import thread
 import urlparse
 import json
+import wordlogic
 
 origin = "*"
 
