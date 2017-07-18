@@ -16,6 +16,13 @@ var easing = 0.1;
 var dragging = false;
 var dataView;
 var setupComplete = false;
+var selectedPoint = null;
+
+// These values found experimentally for this specific map
+// Just the center positions / spacing for each hex
+var hexwidth = 46.5
+var hmargin = 35
+var wmargin = 23.25
 
 function setup() {
     globalCanvas = createCanvas(W, H);
@@ -123,6 +130,17 @@ function drawPoints() {
         dataView.fill(p.colour);
         dataView.ellipse(p.x+mapOffset.x, p.y+mapOffset.y, 20, 20);
      })
+
+    // var w = 2048
+    // var h = 2048
+    // dataView.fill([0,0,0,0]);
+    // dataView.stroke([255,0,0,100]);
+    // for (var i = 0; i*hexwidth < w; i++) {
+    //     for (var j = 0; j*hexwidth < h; j++) {  
+    //         var yoff = i%2==0?0.5*hdot:0;
+    //         dataView.ellipse(i*hexwidth+mapOffset.x+wmargin, j*hexwidth+mapOffset.y+hmargin+yoff, hexwidth, hexwidth);
+    //     }
+    // }
 }
 
 function setupMaps(callback) {
@@ -154,7 +172,6 @@ function updateFields() {
     points.forEach(function(point) {
         point.fields.forEach(function(field) {
             field.emit(mapImages.size.width, mapImages.size.height);
-            console.log(field.data.length);
         });
     });
 }
@@ -270,6 +287,41 @@ function moveMap() {
 
 function mouseClicked() {
     if (!keyIsDown(CONTROL)) return;
-    var loc = {'\'x\'': Math.round(mouseX - mapOffset.x), '\'y\'': Math.round(mouseY - mapOffset.y)};
-    console.log(loc);
+
+    var loc = {x: Math.round(mouseX - mapOffset.x), y: Math.round(mouseY - mapOffset.y)};
+    var sidebar = document.querySelector('#menu');
+    var main = sidebar.querySelector("#main-view");
+    var newpoint = sidebar.querySelector(".new-point-form");
+    newpoint.querySelector("#x").setAttribute("value", loc.x);
+    newpoint.querySelector("#y").setAttribute("value", loc.y);
+    main.style.display = "none";
+    newpoint.style.display = "block";
+    var inputs = document.querySelectorAll('.mdl-textfield');
+    inputs.forEach(d => d.MaterialTextfield.checkDirty());
+}
+
+function addPoint() {
+    var sidebar = document.querySelector('#menu');
+    var main = sidebar.querySelector("#main-view");
+    var newpoint = sidebar.querySelector(".new-point-form");
+    var x = parseInt(newpoint.querySelector("#x").value);
+    var y = parseInt(newpoint.querySelector("#y").value);
+    var name = newpoint.querySelector("#name").value;
+    var radius = parseInt(newpoint.querySelector("#radius").value);
+    main.style.display = "block";
+    newpoint.style.display = "none";
+    points.push(new Location(x, y, [200, 150, 100, 255]));
+    selected = points[points.length-1];
+    points[points.length - 1].addField(name, [200, 150, 100, 255], radius, 255);
+    points[points.length - 1].fields.forEach(field => field.emit(mapImages.size.width, mapImages.size.height))
+    console.log(newpoint.querySelector("#name"));
+}
+
+function cancelAddPoint() {
+    var sidebar = document.querySelector('#menu');
+    var main = sidebar.querySelector("#main-view");
+    var newpoint = sidebar.querySelector(".new-point-form");
+    main.style.display = "block";
+    newpoint.style.display = "none";
+    selected = null;
 }

@@ -67,6 +67,7 @@ class Location {
     addField(tag, colour, radius, peak, interference=[]) {
         var field = new Field(tag, colour, radius, peak, this.x, this.y, interference);
         this.fields.push(field)
+        return this.fields[this.fields.length -1];
     }
 
     numFields() {

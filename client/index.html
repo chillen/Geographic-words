@@ -4,6 +4,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/p5.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/picomodal/3.0.0/picoModal.min.js"></script>
     <script src="models.js"></script>
     <script src="sketch.js"></script>
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
@@ -13,17 +14,52 @@
   <body id="body">
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
       <div class="mdl-layout__drawer" id="menu">
-        <span class="mdl-layout-title">Procedural POI</span>
-        <p>In this demo, you can explore various influence fields being 
-          generated around provided points of interest. Click and drag to
-          examine the values of the field on the top right graph.
-        </p>
-        <p>Press and hold shift and drag to move the map.</p>
-        <p>CTRL+Click anywhere to have the in-map location displayed in console.</p>
-        <nav class="mdl-navigation">
-          <button class="mdl-button" onclick="swapMap('height')">Heightmap</button>
-          <button class="mdl-button" onclick="swapMap('moisture')">Moisture</button>
-          <button class="mdl-button" onclick="swapMap('biome')">Biome</button>
+        <div id="main-view">
+          <span class="mdl-layout-title">Word Associations</span>
+          <p>In this demo, you can explore various influence fields being 
+            generated around provided points of interest. Click and drag to
+            examine the values of the field on the top right graph.
+          </p>
+          <p>Press and hold shift and drag to move the map.</p>
+          <p>CTRL+Click anywhere to have the in-map location displayed in console.</p>
+          <nav class="mdl-navigation">
+            <button class="mdl-button" onclick="swapMap('height')">Heightmap</button>
+            <button class="mdl-button" onclick="swapMap('moisture')">Moisture</button>
+            <button class="mdl-button" onclick="swapMap('biome')">Biome</button>
+          </div>
+          <div class="new-point-form" style="display: none">
+            <h3>Adding New Point</h3>
+            <p>Using this form you can add a new point to the map.</p>
+            <form action="#">
+            <div style="width: 40%" pattern="-?[0-9]*(\.[0-9]+)?" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" id="x">
+              <label class="mdl-textfield__label" for="name">x</label>
+              <span class="mdl-textfield__error">Input is not a number!</span>
+            </div>
+            <div style="width: 40%" pattern="-?[0-9]*(\.[0-9]+)?" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" id="y">
+              <label class="mdl-textfield__label" for="name">y</label>
+              <span class="mdl-textfield__error">Input is not a number!</span>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" id="name">
+              <label class="mdl-textfield__label" for="name">Point Name</label>
+            </div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <input class="mdl-textfield__input" type="text" id="radius"  pattern="-?[0-9]*(\.[0-9]+)?">
+              <label class="mdl-textfield__label" for="radius">Radius of Effect (pixels)</label>
+              <span class="mdl-textfield__error">Input is not a number!</span>
+            </div>
+
+            <button onclick="addPoint()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+              Add
+            </button>
+            <button onclick="cancelAddPoint()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
+              Cancel
+            </button>
+
+          </form>
+          </div>
         </nav>
       </div>
       <main class="mdl-layout__content" id="wrap-wrap">
