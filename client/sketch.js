@@ -48,7 +48,6 @@ function setupSizes() {
 function setupData() {
     setupMaps(function() {
         setupPoints();
-        updateFields();
         setupComplete = true;
     });
 }
@@ -109,7 +108,7 @@ function drawGraphData(field, curvePoints) {
     var i = 0;
     var g = graphView;
     curvePoints = curvePoints.map(function(p) {
-        return [i++, map(field.data[p[0]-Math.round(mapOffset.x)][p[1]-Math.round(mapOffset.y)], 0, 255, graphHeight, 0)];
+        return [i++, map(field.at(p[0]-Math.round(mapOffset.x), p[1]-Math.round(mapOffset.y)), 0, 255, graphHeight, 0)];
     });
     g.stroke(field.colour);
     g.strokeWeight(2);
@@ -130,17 +129,6 @@ function drawPoints() {
         dataView.fill(p.colour);
         dataView.ellipse(p.x+mapOffset.x, p.y+mapOffset.y, 20, 20);
      })
-
-    // var w = 2048
-    // var h = 2048
-    // dataView.fill([0,0,0,0]);
-    // dataView.stroke([255,0,0,100]);
-    // for (var i = 0; i*hexwidth < w; i++) {
-    //     for (var j = 0; j*hexwidth < h; j++) {  
-    //         var yoff = i%2==0?0.5*hdot:0;
-    //         dataView.ellipse(i*hexwidth+mapOffset.x+wmargin, j*hexwidth+mapOffset.y+hmargin+yoff, hexwidth, hexwidth);
-    //     }
-    // }
 }
 
 function setupMaps(callback) {
@@ -167,17 +155,9 @@ function setupPoints() {
             var g = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 1]
             var b = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 2]
             points.push(new Location(xpos, ypos, [r, g, b, 255]));
-            // points[points.length - 1].addField(str(r)+str(g)+str(b), [r,g,b, 255], hexwidth, 255);
+            points[points.length - 1].addField(str(r)+str(g)+str(b), [r,g,b, 255], hexwidth, 255);
         }
     }
-}
-
-function updateFields() {
-    points.forEach(function(point) {
-        point.fields.forEach(function(field) {
-            field.emit(mapImages.size.width, mapImages.size.height);
-        });
-    });
 }
 
 function drawData() {
@@ -318,7 +298,7 @@ function addPoint() {
     points.push(new Location(x, y, [200, 150, 100, 255]));
     selected = points[points.length-1];
     points[points.length - 1].addField(name, [200, 150, 100, 255], radius, 255);
-    points[points.length - 1].fields.forEach(field => field.emit(mapImages.size.width, mapImages.size.height))
+    // points[points.length - 1].fields.forEach(field => field.emit(mapImages.size.width, mapImages.size.height))
     console.log(newpoint.querySelector("#name"));
 }
 
