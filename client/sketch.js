@@ -144,20 +144,20 @@ function setupMaps(callback) {
 
 function setupPoints() {
     points = [];
-    mapImages["biome"].loadPixels();
-    for (var x = 0; x*hexwidth < mapImages["size"].width; x++) {
-        for (var y = 0; y*hexwidth < mapImages["size"].height; y++) {
-            var yoff = x % 2 == 0? 0.5*hexwidth : 0;
-            var xpos = Math.floor(x*hexwidth+wmargin);
-            var ypos = Math.floor(y*hexwidth+hmargin+yoff);
-            var mapwidth = mapImages["size"].width;
-            var r = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 0]
-            var g = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 1]
-            var b = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 2]
-            points.push(new Location(xpos, ypos, [r, g, b, 255]));
-            points[points.length - 1].addField(str(r)+str(g)+str(b), [r,g,b, 255], hexwidth, 255);
-        }
-    }
+    // mapImages["biome"].loadPixels();
+    // for (var x = 0; x*hexwidth < mapImages["size"].width; x++) {
+    //     for (var y = 0; y*hexwidth < mapImages["size"].height; y++) {
+    //         var yoff = x % 2 == 0? 0.5*hexwidth : 0;
+    //         var xpos = Math.floor(x*hexwidth+wmargin);
+    //         var ypos = Math.floor(y*hexwidth+hmargin+yoff);
+    //         var mapwidth = mapImages["size"].width;
+    //         var r = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 0]
+    //         var g = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 1]
+    //         var b = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 2]
+    //         points.push(new Location(xpos, ypos, [r, g, b, 255]));
+    //         points[points.length - 1].addField(str(r)+str(g)+str(b), [r,g,b, 255], hexwidth, 255);
+    //     }
+    // }
 }
 
 function drawData() {
