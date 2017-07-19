@@ -7,7 +7,9 @@ class Field {
         this.x = x;
         this.y = y;
         this.interference = interference;
-        this.data = {}
+        this.data = {};
+        this._emit();
+        this.displayed = false;
     }
 
     at(x, y) {
@@ -25,6 +27,14 @@ class Field {
         this.data[x][y] = f;
         return f;
     };
+
+    _emit() {
+        for (let x = this.x - this.radius; x < this.x + this.radius; x++) {
+            for (let y = this.y - this.radius; y < this.y + this.radius; y++) {
+                this.at(x, y);
+            }
+        }
+    }
 }
 
 class Location {

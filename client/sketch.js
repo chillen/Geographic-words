@@ -3,6 +3,7 @@ var W = 1920;
 var H = 1080;
 var mainView;
 var graphView;
+var fieldView;
 var graphHeight = 200;
 var graphWidth = 400;
 var mainWidth = W-graphWidth;
@@ -30,6 +31,7 @@ function setup() {
     mainView = createGraphics(W,H);
     graphView = createGraphics(graphWidth, graphHeight);
     dataView = createGraphics(W, H);
+    fieldView = createGraphics(W, H);
     setupData();
     setTimeout(setupSizes, 1);
     cursor(CROSS);
@@ -43,6 +45,8 @@ function setupSizes() {
     mainView.resizeCanvas(mainWidth, H);
     graphView.resizeCanvas(graphWidth, graphHeight);
     dataView.resizeCanvas(mainWidth, H);
+
+    fieldView.resizeCanvas(mainWidth, H);
 }
 
 function setupData() {
@@ -60,7 +64,8 @@ function draw() {
     drawDataView();
     image(mainView, 0, 0);
     image(graphView, mainWidth, 0);
-    image(dataView, 0, 0);
+    image(dataView, mapOffset.x, mapOffset.y);
+    image(fieldView, mapOffset.x, mapOffset.y);
 }
 
 function drawMainView() {
@@ -72,10 +77,10 @@ function drawMainView() {
 
 function drawDataView() {
     dataView.clear();
+    drawData();
     drawPoints();
     drawClicks();
     drawLine();
-    drawData();
 }
 
 function drawGraphView() {
@@ -127,7 +132,7 @@ function drawPoints() {
     dataView.stroke([0,0,0,255])
     points.forEach(function(p) { 
         dataView.fill(p.colour);
-        dataView.ellipse(p.x+mapOffset.x, p.y+mapOffset.y, 20, 20);
+        dataView.ellipse(p.x, p.y, 20, 20);
      })
 }
 
@@ -144,41 +149,35 @@ function setupMaps(callback) {
 
 function setupPoints() {
     points = [];
-    // mapImages["biome"].loadPixels();
-    // for (var x = 0; x*hexwidth < mapImages["size"].width; x++) {
-    //     for (var y = 0; y*hexwidth < mapImages["size"].height; y++) {
-    //         var yoff = x % 2 == 0? 0.5*hexwidth : 0;
-    //         var xpos = Math.floor(x*hexwidth+wmargin);
-    //         var ypos = Math.floor(y*hexwidth+hmargin+yoff);
-    //         var mapwidth = mapImages["size"].width;
-    //         var r = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 0]
-    //         var g = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 1]
-    //         var b = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 2]
-    //         points.push(new Location(xpos, ypos, [r, g, b, 255]));
-    //         points[points.length - 1].addField(str(r)+str(g)+str(b), [r,g,b, 255], hexwidth, 255);
-    //     }
-    // }
+    points.push(new Location(330, 200, [200, 150, 50, 255]));
+    points[points.length-1].addField("test", [200, 200, 0, 255], 250, 255);
+    points.push(new Location(410, 200, [200, 150, 50, 255]));
+    points[points.length-1].addField("test", [200, 0, 0, 255], 250, 255);
 }
 
+var here = false;
+
 function drawData() {
-    // dataView.loadPixels();
-    // points.forEach(function (point) {
-    //     point.fields.forEach(function(field) {
-    //         for (var i = 0; i < dataView.pixels.length; i+=4) {
-    //             var x = Math.floor(i / 4) % dataView.width - Math.round(mapOffset.x);
-    //             var y = Math.floor(Math.floor(i / 4) / dataView.width  - Math.round(mapOffset.y));
-    //             if (field.x - field.radius < x && x < field.x + field.radius) {
-    //                 if (field.y - field.radius < y && y < field.y + field.radius) {
-    //                     dataView.pixels[i] += (field.colour[0] / 255) * field.data[x][y];
-    //                     dataView.pixels[i+1] += (field.colour[1] / 255) * field.data[x][y];
-    //                     dataView.pixels[i+2] += (field.colour[2] / 255) * field.data[x][y];
-    //                     dataView.pixels[i+3] = 255
-    //                 }
-    //             }
-    //         }
-    //     });
-    // });
-    // dataView.updatePixels()
+    fieldView.loadPixels();
+    for (let point of points) {
+        for (let field of point.fields) {
+            if (field.displayed)
+                continue;
+            for (let x in field.data) {
+                for (let y in field.data[x]) {
+                    
+                    let pos = Math.ceil(x) * 4 + Math.ceil(y) * 4 * mainWidth;
+                    fieldView.pixels[pos] += (field.colour[0] / 255) * field.at(x,y);
+                    fieldView.pixels[pos+1] += (field.colour[1] / 255) * field.at(x,y);
+                    fieldView.pixels[pos+2] += (field.colour[2] / 255) * field.at(x,y);
+                    fieldView.pixels[pos+3] += field.at(x,y);
+                }
+            }
+            field.displayed = true;
+        }
+    }
+
+    fieldView.updatePixels();
 }
 
 function windowResized() {
@@ -299,7 +298,6 @@ function addPoint() {
     selected = points[points.length-1];
     points[points.length - 1].addField(name, [200, 150, 100, 255], radius, 255);
     // points[points.length - 1].fields.forEach(field => field.emit(mapImages.size.width, mapImages.size.height))
-    console.log(newpoint.querySelector("#name"));
 }
 
 function cancelAddPoint() {
