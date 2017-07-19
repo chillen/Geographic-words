@@ -125,7 +125,7 @@ function drawGraphData(field, curvePoints) {
 
 function drawPoints() {
     dataView.ellipseMode(CENTER);
-    dataView.noStroke();
+    dataView.stroke([0,0,0,255])
     points.forEach(function(p) { 
         dataView.fill(p.colour);
         dataView.ellipse(p.x+mapOffset.x, p.y+mapOffset.y, 20, 20);
@@ -156,16 +156,20 @@ function setupMaps(callback) {
 
 function setupPoints() {
     points = [];
-    // Lakes
-    var lakes = [];
-    lakes.push({'x': 577, 'y': 1077});
-    lakes.push({'x': 573, 'y': 1131});
-    lakes.push({'x': 636, 'y': 1107});
-    lakes.push({'x': 1140, 'y': 292});
-    lakes.forEach(function(p) {
-        points.push(new Location(p.x, p.y, [100, 100, 200, 255]));
-        points[points.length - 1].addField("lake", [100, 100, 200, 255], 500, 255);
-    });
+    mapImages["biome"].loadPixels();
+    for (var x = 0; x*hexwidth < mapImages["size"].width; x++) {
+        for (var y = 0; y*hexwidth < mapImages["size"].height; y++) {
+            var yoff = x % 2 == 0? 0.5*hexwidth : 0;
+            var xpos = Math.floor(x*hexwidth+wmargin);
+            var ypos = Math.floor(y*hexwidth+hmargin+yoff);
+            var mapwidth = mapImages["size"].width;
+            var r = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 0]
+            var g = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 1]
+            var b = mapImages["biome"].pixels[(xpos*4) + (ypos*4)*mapwidth + 2]
+            points.push(new Location(xpos, ypos, [r, g, b, 255]));
+            // points[points.length - 1].addField(str(r)+str(g)+str(b), [r,g,b, 255], hexwidth, 255);
+        }
+    }
 }
 
 function updateFields() {
@@ -286,6 +290,7 @@ function moveMap() {
 }
 
 function mouseClicked() {
+
     if (!keyIsDown(CONTROL)) return;
 
     var loc = {x: Math.round(mouseX - mapOffset.x), y: Math.round(mouseY - mapOffset.y)};
