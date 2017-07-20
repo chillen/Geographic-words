@@ -1,21 +1,11 @@
-var bgColor = [50,50,50, 255];
-var W = 1920;
-var H = 1080;
-var mainView;
-var graphView;
-var fieldView;
-var graphHeight = 200;
-var graphWidth = 400;
-var mainWidth = W-graphWidth;
+var view = {main: null, graph: null, points: null, graph: null}
 var points;
-var globalCanvas;
 var clickPoints = [];
 var mapImages = {};
 var activeMap = 'biome';
 var mapOffset = {'x':0, 'y':0};
 var easing = 0.1;
 var dragging = false;
-var dataView;
 var setupComplete = false;
 var selectedPoint = null;
 
@@ -26,27 +16,25 @@ var hmargin = 35
 var wmargin = 23.25
 
 function setup() {
-    globalCanvas = createCanvas(W, H);
-    globalCanvas.parent('sketch');
-    mainView = createGraphics(W,H);
-    graphView = createGraphics(graphWidth, graphHeight);
-    dataView = createGraphics(W, H);
-    fieldView = createGraphics(W, H);
+    createCanvas(100,100).parent('sketch');
+    view['main'] = createGraphics(100,100);
+    view['data'] = createGraphics(2048,2048);
+    view['field'] = createGraphics(2048,2048);
+    view['graph'] = createGraphics(400, 200);
+    setupSizes();
+
     setupData();
     setTimeout(setupSizes, 1);
     cursor(CROSS);
 }
 
 function setupSizes() {
-    H = document.getElementById('wrap-wrap').getBoundingClientRect().height;
-    W = document.getElementById('wrap-wrap').getBoundingClientRect().width;
-    mainWidth = W-graphWidth;
-    resizeCanvas(W, H);
-    mainView.resizeCanvas(mainWidth, H);
-    graphView.resizeCanvas(graphWidth, graphHeight);
-    dataView.resizeCanvas(mainWidth, H);
-
-    fieldView.resizeCanvas(mainWidth, H);
+    let H = document.getElementById('wrap-wrap').getBoundingClientRect().height;
+    let W = document.getElementById('wrap-wrap').getBoundingClientRect().width;
+    resizeCanvas(W, H)
+    view["main"].width = W;
+    view["main"].height = H;
+    view["main"].resizeCanvas(W, H);
 }
 
 function setupData() {
@@ -62,21 +50,22 @@ function draw() {
     drawMainView();
     drawGraphView();
     drawDataView();
-    image(mainView, 0, 0);
-    image(graphView, mainWidth, 0);
-    image(dataView, mapOffset.x, mapOffset.y);
-    image(fieldView, mapOffset.x, mapOffset.y);
+    image(view["main"], 0, 0);
+    image(view["field"], mapOffset.x, mapOffset.y);
+    image(view["data"], mapOffset.x, mapOffset.y);
+
+    image(view["graph"], view["main"].width-view["graph"].width, view["main"].height-view["graph"].height);
 }
 
 function drawMainView() {
-    var m = mainView;
-    m.background(bgColor);
+    let m = view["main"];
+    m.background([50,50,50, 255]);
     moveMap();
     m.image(mapImages[activeMap], mapOffset.x, mapOffset.y);
 }
 
 function drawDataView() {
-    dataView.clear();
+    view["data"].clear();
     drawData();
     drawPoints();
     drawClicks();
@@ -84,23 +73,23 @@ function drawDataView() {
 }
 
 function drawGraphView() {
-    var g = graphView;
-    g.background([0,0,0, 255]);
-    g.stroke([40, 40, 40, 255]);
+    let g = view["graph"];
+    g.background([0,0,0, 150]);
+    g.stroke([40, 40, 40, 150]);
     g.strokeWeight(1);
-    for (var i = 0; i < Math.max(graphHeight, graphWidth); i+=10) {
+    for (let i = 0; i < Math.max(g.height, g.width); i+=10) {
         g.line(0, i, g.width, i);
         g.line(i, 0, i, g.height);
     }
     if (clickPoints.length != 2) return;
-    var clickSort = [0, 0];
+    let clickSort = [0, 0];
     if (clickPoints[0][0] > clickPoints[1][0]) {
         clickSort = [clickPoints[1], clickPoints[0]];
     }
     else {
         clickSort = [clickPoints[0], clickPoints[1]];
     }
-    var curveLine = pointsBetween(clickSort);
+    let curveLine = pointsBetween(clickSort);
     if (curveLine.length < 2) return;
     points.forEach(function(p) {
         p.fields.forEach(function(f) {
@@ -111,9 +100,9 @@ function drawGraphView() {
 
 function drawGraphData(field, curvePoints) {
     var i = 0;
-    var g = graphView;
+    var g = view["graph"];
     curvePoints = curvePoints.map(function(p) {
-        return [i++, map(field.at(p[0]-Math.round(mapOffset.x), p[1]-Math.round(mapOffset.y)), 0, 255, graphHeight, 0)];
+        return [i++, map(field.at(p[0]-Math.round(mapOffset.x), p[1]-Math.round(mapOffset.y)), 0, 1, g.height, 0)];
     });
     g.stroke(field.colour);
     g.strokeWeight(2);
@@ -128,12 +117,12 @@ function drawGraphData(field, curvePoints) {
 }
 
 function drawPoints() {
-    dataView.ellipseMode(CENTER);
-    dataView.stroke([0,0,0,255])
-    points.forEach(function(p) { 
-        dataView.fill(p.colour);
-        dataView.ellipse(p.x, p.y, 20, 20);
-     })
+    view["data"].ellipseMode(CENTER);
+    view["data"].noStroke()
+    for (let point of points) {
+        view["data"].fill(point.colour);
+        view["data"].ellipse(point.x, point.y, 20, 20);
+    }
 }
 
 function setupMaps(callback) {
@@ -149,35 +138,32 @@ function setupMaps(callback) {
 
 function setupPoints() {
     points = [];
-    points.push(new Location(330, 200, [200, 150, 50, 255]));
-    points[points.length-1].addField("test", [200, 200, 0, 255], 250, 255);
-    points.push(new Location(410, 200, [200, 150, 50, 255]));
-    points[points.length-1].addField("test", [200, 0, 0, 255], 250, 255);
+    points.push(new Location(766, 708, [200, 150, 50, 255]));
+    points[points.length-1].addField("test", [200, 200, 0, 255], 300);
+    points.push(new Location(625, 500, [200, 150, 50, 255]));
+    points[points.length-1].addField("test", [200, 0, 0, 255], 300);
 }
 
-var here = false;
-
 function drawData() {
-    fieldView.loadPixels();
+    view["field"].loadPixels();
     for (let point of points) {
         for (let field of point.fields) {
             if (field.displayed)
                 continue;
             for (let x in field.data) {
                 for (let y in field.data[x]) {
-                    
-                    let pos = Math.ceil(x) * 4 + Math.ceil(y) * 4 * mainWidth;
-                    fieldView.pixels[pos] += (field.colour[0] / 255) * field.at(x,y);
-                    fieldView.pixels[pos+1] += (field.colour[1] / 255) * field.at(x,y);
-                    fieldView.pixels[pos+2] += (field.colour[2] / 255) * field.at(x,y);
-                    fieldView.pixels[pos+3] += field.at(x,y);
+                    let pos = Math.ceil(x) * 4 + Math.ceil(y) * 4 * view["field"].width;
+                    view["field"].pixels[pos] += (field.colour[0]) * (field.at(x,y) / 1);
+                    view["field"].pixels[pos+1] += (field.colour[1]) * (field.at(x,y) / 1);
+                    view["field"].pixels[pos+2] += (field.colour[2]) * (field.at(x,y) / 1);
+                    view["field"].pixels[pos+3] += 255 * (field.at(x,y) / 1);
+                    field.displayed = true;
                 }
             }
-            field.displayed = true;
         }
     }
 
-    fieldView.updatePixels();
+    view["field"].updatePixels();
 }
 
 function windowResized() {
@@ -190,16 +176,17 @@ function mouseDragged() {
         dragging = true;
     }
     else {
-        if (mouseX > mainWidth || mouseY > H || mouseX < 0 || mouseY < 0) {
+        if (mouseX > view["main"].width || mouseY > view["main"].height || mouseX < 0 || mouseY < 0) {
             return;
         }
-        if (clickPoints.length == 2)
+        if (clickPoints.length == 2) {
             clickPoints[1] = [mouseX, mouseY]
+        }
     }
 }
 
 function mousePressed() {
-    if (mouseX > mainWidth || mouseX < 0 || mouseY < 0 || mouseY > H) {
+    if (mouseX > view["main"].width || mouseX < 0 || mouseY < 0 || mouseY > view["main"].height) {
         return
     }
     if (mouseButton == LEFT) {
@@ -213,18 +200,18 @@ function drawClicks() {
     crossLength = 5
     if (clickPoints.length < 2) return;
     clickPoints.forEach(function(p) {
-        mainView.strokeWeight(1);
-        mainView.stroke(0);
-        mainView.line(p[0]-crossLength, p[1], p[0]+crossLength, p[1]);
-        mainView.line(p[0], p[1]-crossLength, p[0], p[1]+crossLength);
+        view["main"].strokeWeight(1);
+        view["main"].stroke(0);
+        view["main"].line(p[0]-crossLength, p[1], p[0]+crossLength, p[1]);
+        view["main"].line(p[0], p[1]-crossLength, p[0], p[1]+crossLength);
     });
 }
 
 function drawLine() {
     if (clickPoints.length == 2) {
-        mainView.strokeWeight(1);
-        mainView.stroke(220, 200, 50);
-        mainView.line(clickPoints[0][0], clickPoints[0][1], clickPoints[1][0], clickPoints[1][1]);
+        view["main"].strokeWeight(1);
+        view["main"].stroke(220, 200, 50);
+        view["main"].line(clickPoints[0][0], clickPoints[0][1], clickPoints[1][0], clickPoints[1][1]);
     }
 }
 
@@ -296,7 +283,7 @@ function addPoint() {
     newpoint.style.display = "none";
     points.push(new Location(x, y, [200, 150, 100, 255]));
     selected = points[points.length-1];
-    points[points.length - 1].addField(name, [200, 150, 100, 255], radius, 255);
+    points[points.length - 1].addField(name, [200, 150, 100, 255], radius);
     // points[points.length - 1].fields.forEach(field => field.emit(mapImages.size.width, mapImages.size.height))
 }
 
