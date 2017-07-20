@@ -6,11 +6,11 @@ var activeMap = 'biome';
 var mapOffset = {'x':0, 'y':0};
 var easing = 0.1;
 var dragging = false;
-var setupComplete = false;
 var selectedPoint = null;
 var mapDetails = { hex: {width: 46.5, hMargin: 35, wMargin: 23.25}, height: 2048, width: 2048 }
 
 function setup() {
+    noLoop();
     cursor(CROSS);
     createGraphics(100, 100);
     init.loadMaps()
@@ -23,7 +23,7 @@ function setup() {
         setupSizes();
     })
     .then(setupPoints)
-    .then(_ => setupComplete = true)
+    .then(loop())
 }
 
 // I'm not sure why, but it takes 0<x<1ms to get height
@@ -39,15 +39,19 @@ function setupSizes() {
 }
 
 function draw() {
-    if (!setupComplete) return;
-    background(0);
-    drawMainView();
-    drawGraphView();
-    drawDataView();
-    image(view["main"], 0, 0);
-    image(view["field"], mapOffset.x, mapOffset.y);
-    image(view["data"], mapOffset.x, mapOffset.y);
-    image(view["graph"], view["main"].width-view["graph"].width, view["main"].height-view["graph"].height);
+    try {
+        background(0);
+        drawMainView();
+        drawGraphView();
+        drawDataView();
+        image(view["main"], 0, 0);
+        image(view["field"], mapOffset.x, mapOffset.y);
+        image(view["data"], mapOffset.x, mapOffset.y);
+        image(view["graph"], view["main"].width-view["graph"].width, view["main"].height-view["graph"].height);
+    }
+    catch (e) {
+        console.log("Loading...");
+    }
 }
 
 function drawMainView() {
