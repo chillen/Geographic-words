@@ -6,3 +6,13 @@
     padding: 5px;
     width: 300px;
 }
+
+#sketch-wrapper {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+}
+
+.mdl-layout--fixed-drawer>.mdl-layout__content  {
+    margin-left: 300px;
+}
