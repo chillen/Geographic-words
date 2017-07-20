@@ -8,40 +8,34 @@ var easing = 0.1;
 var dragging = false;
 var setupComplete = false;
 var selectedPoint = null;
-
-// These values found experimentally for this specific map
-// Just the center positions / spacing for each hex
-var hexwidth = 46.5
-var hmargin = 35
-var wmargin = 23.25
+var mapDetails = { hex: {width: 46.5, hMargin: 35, wMargin: 23.25}, height: 2048, width: 2048 }
 
 function setup() {
-    createCanvas(100,100).parent('sketch');
-    view['main'] = createGraphics(100,100);
-    view['data'] = createGraphics(2048,2048);
-    view['field'] = createGraphics(2048,2048);
-    view['graph'] = createGraphics(400, 200);
-    setupSizes();
-
-    setupData();
-    setTimeout(setupSizes, 1);
     cursor(CROSS);
+    createGraphics(100, 100);
+    init.loadMaps()
+    .then(maps => mapImages = maps)
+    .then(function() {
+        view['main'] = createGraphics(100, 100);
+        view['data'] = createGraphics(mapDetails.width, mapDetails.height);
+        view['field'] = createGraphics(mapDetails.width,mapDetails.height);
+        view['graph'] = createGraphics(400, 200);
+        setupSizes();
+    })
+    .then(setupPoints)
+    .then(_ => setupComplete = true)
 }
 
+// I'm not sure why, but it takes 0<x<1ms to get height
 function setupSizes() {
-    let H = document.getElementById('wrap-wrap').getBoundingClientRect().height;
-    let W = document.getElementById('wrap-wrap').getBoundingClientRect().width;
-    resizeCanvas(W, H)
-    view["main"].width = W;
-    view["main"].height = H;
-    view["main"].resizeCanvas(W, H);
-}
-
-function setupData() {
-    setupMaps(function() {
-        setupPoints();
-        setupComplete = true;
-    });
+    setTimeout(function() {
+        let H = document.getElementById('wrap-wrap').getBoundingClientRect().height;
+        let W = document.getElementById('wrap-wrap').getBoundingClientRect().width;
+        resizeCanvas(W, H)
+        view["main"].width = W;
+        view["main"].height = H;
+        view["main"].resizeCanvas(W, H);
+    }, 1);
 }
 
 function draw() {
@@ -53,7 +47,6 @@ function draw() {
     image(view["main"], 0, 0);
     image(view["field"], mapOffset.x, mapOffset.y);
     image(view["data"], mapOffset.x, mapOffset.y);
-
     image(view["graph"], view["main"].width-view["graph"].width, view["main"].height-view["graph"].height);
 }
 
@@ -65,7 +58,7 @@ function drawMainView() {
 }
 
 function drawDataView() {
-    view["data"].clear();
+    //view["data"].clear();
     drawData();
     drawPoints();
     drawClicks();
@@ -125,17 +118,6 @@ function drawPoints() {
     }
 }
 
-function setupMaps(callback) {
-    mapImages['biome'] = loadImage("data/biomeMap.png", function() {
-        mapImages['height'] = loadImage("data/heightMap.png", function() {
-                mapImages['moisture'] = loadImage("data/moistureMap.png", function(m) {
-                    mapImages['size'] = {'height': m.height, 'width': m.width};
-                    callback();
-                });
-        });
-    });
-}
-
 function setupPoints() {
     points = [];
     points.push(new Location(766, 708, [200, 150, 50, 255]));
@@ -145,11 +127,15 @@ function setupPoints() {
 }
 
 function drawData() {
-    view["field"].loadPixels();
+    let loaded = false;
     for (let point of points) {
         for (let field of point.fields) {
             if (field.displayed)
                 continue;
+            if (!loaded) {
+                loaded = true;
+                view["field"].loadPixels();
+            }
             for (let x in field.data) {
                 for (let y in field.data[x]) {
                     let pos = Math.ceil(x) * 4 + Math.ceil(y) * 4 * view["field"].width;
@@ -162,8 +148,8 @@ function drawData() {
             }
         }
     }
-
-    view["field"].updatePixels();
+    if (loaded == true)
+        view["field"].updatePixels();
 }
 
 function windowResized() {
@@ -284,7 +270,7 @@ function addPoint() {
     points.push(new Location(x, y, [200, 150, 100, 255]));
     selected = points[points.length-1];
     points[points.length - 1].addField(name, [200, 150, 100, 255], radius);
-    // points[points.length - 1].fields.forEach(field => field.emit(mapImages.size.width, mapImages.size.height))
+    // points[points.length - 1].fields.forEach(field => field.emit(mapDetails.width, mapDetails.height))
 }
 
 function cancelAddPoint() {
