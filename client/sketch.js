@@ -14,16 +14,19 @@ function setup() {
     cursor(CROSS);
     createGraphics(100, 100);
     init.loadMaps()
-    .then(maps => mapImages = maps)
-    .then(function() {
-        view['main'] = createGraphics(100, 100);
-        view['data'] = createGraphics(mapDetails.width, mapDetails.height);
-        view['field'] = createGraphics(mapDetails.width,mapDetails.height);
-        view['graph'] = createGraphics(400, 200);
-        setupSizes();
-    })
-    .then(setupPoints)
+    .then(loadedMaps => mapImages = loadedMaps)
+    .then(createScenes)
+    .then(setupSizes)
+    .then(init.loadPoints)
+    .then(p => points = p)
     .then(loop())
+}
+
+function createScenes() {
+    view['main'] = createGraphics(100, 100);
+    view['data'] = createGraphics(mapDetails.width, mapDetails.height);
+    view['field'] = createGraphics(mapDetails.width,mapDetails.height);
+    view['graph'] = createGraphics(400, 200);
 }
 
 // I'm not sure why, but it takes 0<x<1ms to get height
@@ -62,7 +65,6 @@ function drawMainView() {
 }
 
 function drawDataView() {
-    //view["data"].clear();
     drawData();
     drawPoints();
     drawClicks();
@@ -120,14 +122,6 @@ function drawPoints() {
         view["data"].fill(point.colour);
         view["data"].ellipse(point.x, point.y, 20, 20);
     }
-}
-
-function setupPoints() {
-    points = [];
-    points.push(new Location(766, 708, [200, 150, 50, 255]));
-    points[points.length-1].addField("test", [200, 200, 0, 255], 300);
-    points.push(new Location(625, 500, [200, 150, 50, 255]));
-    points[points.length-1].addField("test", [200, 0, 0, 255], 300);
 }
 
 function drawData() {

@@ -29,5 +29,17 @@ var init = (function() {
         });
     }
 
-    return { loadMaps: loadMaps }
+    function loadPoints() {
+        let points = [];
+        points.push(new Location(766, 708, [200, 150, 50, 255]));
+        points[points.length-1].addField("test", [200, 200, 0, 255], 300);
+        points.push(new Location(625, 500, [200, 150, 50, 255]));
+        points[points.length-1].addField("test", [200, 0, 0, 255], 300);
+
+        return new Promise(function(resolve, reject) {
+            resolve(points);
+        })
+    }
+
+    return { loadMaps: loadMaps, loadPoints: loadPoints }
 })();
