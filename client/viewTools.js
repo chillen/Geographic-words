@@ -12,6 +12,7 @@ var viewTools = (function (m) {
   function initialize (sketch, maps) {
     m.maps = maps
     m.sketch = sketch
+    m.sketch.cursor(sketch.CROSS)
     loadMaps(maps)
       .then(maps => (m.mapImages = maps))
       .then(setupScenes)
@@ -105,6 +106,8 @@ var viewTools = (function (m) {
   }
 
   function drawClicks (points) {
+    if (points.length < 2) return;
+
     let length = 5
     for (let point of points) {
       m.sketch.strokeWeight(1)
@@ -113,10 +116,8 @@ var viewTools = (function (m) {
       m.sketch.line(point.x, point.y - length, point.x, point.y + length)
     }
 
-    if (points.length === 2) {
-      m.sketch.stroke(200, 200, 200)
-      m.sketch.line(points[0].x, points[0].y, points[1].x, points[1].y)
-    }
+    m.sketch.stroke(200, 200, 200)
+    m.sketch.line(points[0].x, points[0].y, points[1].x, points[1].y)
   }
 
   function drawGraphData (points, fields) {
