@@ -5,6 +5,7 @@ var controller = (function (m) {
     m.model = model
     m.view = view
     m.sketch = sketch
+    m.dom = domController
     m.activeMap = 'biome'
     m.clicks = []
     m.dragging = false
@@ -31,6 +32,20 @@ var controller = (function (m) {
 
   function swapMap (map) {
     m.activeMap = map
+  }
+
+  function addPoint () {
+    let x = m.dom.get('x')
+    let y = m.dom.get('y')
+    let radius = m.dom.get('radius')
+    let name = m.dom.get('name')
+    m.model.addPoint(x, y, radius, name)
+    m.dom.displayMainForm()
+    m.dom.clearNewPointForm()
+  }
+
+  function cancelAddPoint () {
+    m.dom.displayMainForm()
   }
 
   // PRIVATE
@@ -97,6 +112,14 @@ var controller = (function (m) {
         m.clicks[1] = {x: s.mouseX, y: s.mouseY}
       }
     }
+
+    s.mouseClicked = function () {
+      if (!s.keyIsDown(s.CONTROL)) return
+      let offset = m.view.getOffset()
+      let loc = { x: Math.round(s.mouseX - offset.x), y: Math.round(s.mouseY - offset.y) }
+      m.dom.displayNewPointForm()
+      m.dom.set('x', loc.x).set('y', loc.y)
+    }
   }
 
   function changeOffset (dragging) {
@@ -128,56 +151,11 @@ var controller = (function (m) {
     return { height: H, width: W }
   }
 
-  return { draw: draw, initialize: initialize, swapMap: swapMap }
+  return {
+    draw: draw,
+    initialize: initialize,
+    swapMap: swapMap,
+    addPoint: addPoint,
+    cancelAddPoint: cancelAddPoint
+  }
 })({})
-
-// function mouseClicked() {
-//     if (!keyIsDown(CONTROL)) return;
-
-//     var loc = { x: Math.round(mouseX - mapOffset.x), y: Math.round(mouseY - mapOffset.y) };
-//     var sidebar = document.querySelector('#menu');
-//     var main = sidebar.querySelector("#main-view");
-//     var newpoint = sidebar.querySelector(".new-point-form");
-//     newpoint.querySelector("#x").setAttribute("value", loc.x);
-//     newpoint.querySelector("#y").setAttribute("value", loc.y);
-//     main.style.display = "none";
-//     newpoint.style.display = "block";
-//     var inputs = document.querySelectorAll('.mdl-textfield');
-//     inputs.forEach(d => d.MaterialTextfield.checkDirty());
-// }
-
-// function addPoint() {
-//     var sidebar = document.querySelector('#menu');
-//     var main = sidebar.querySelector("#main-view");
-//     var newpoint = sidebar.querySelector(".new-point-form");
-//     var x = parseInt(newpoint.querySelector("#x").value);
-//     var y = parseInt(newpoint.querySelector("#y").value);
-//     var name = newpoint.querySelector("#name").value;
-//     var radius = parseInt(newpoint.querySelector("#radius").value);
-//     newpoint.style.display = "none";
-//     points.push(new Location(x, y, [200, 150, 100, 255]));
-//     selected = points[points.length - 1];
-//     points[points.length - 1].addField(name, [200, 150, 100, 255], radius);
-//     displaySelected(points[points.length - 1]);
-// }
-
-// function displaySelected(p) {
-//     var sidebar = document.querySelector('#menu');
-//     var main = sidebar.querySelector("#main-view");
-//     var newpoint = sidebar.querySelector(".point-information");
-//     var name = newpoint.querySelector("#name");
-//     var coords = newpoint.querySelector("#coords");
-//     newpoint.style.display = "block";
-//     name.innerHTML = p.name;
-//     coords.innerHTML = "(" + p.x + ", " + p.y + ")";
-// }
-
-// function cancelAddPoint() {
-//     var sidebar = document.querySelector('#menu');
-//     var main = sidebar.querySelector("#main-view");
-//     var selected = sidebar.querySelector(".point-information");
-//     var newpoint = sidebar.querySelector(".new-point-form");
-//     main.style.display = "block";
-//     newpoint.style.display = "none";
-//     selected.style.display = "none";
-// }

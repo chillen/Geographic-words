@@ -21,5 +21,16 @@ var modelData = (function () {
     return fields
   }
 
-  return {initialize: initialize, getPoints: getPoints, getFields: getFields}
+  function addPoint (x, y, radius, name, colour = [200, 200, 150, 255]) {
+    let point = new Location(x, y, colour)
+    point.addField(name, colour, radius)
+    points.push(point)
+  }
+
+  return {
+    initialize: initialize,
+    getPoints: getPoints,
+    getFields: getFields,
+    addPoint: addPoint
+  }
 })()

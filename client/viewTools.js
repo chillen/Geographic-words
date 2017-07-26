@@ -5,7 +5,6 @@ var viewTools = (function (m) {
   m.scenes = {}
   m.mapDetails = { hex: { width: 46.5, hMargin: 35, wMargin: 23.25 }, height: 2048, width: 2048 }
   m.mapOffset = {x: 0, y: 0}
-  m.resizeTimeout = null
   m.graphSize = {width: 400, height: 200}
 
   // PUBLIC
@@ -26,7 +25,7 @@ var viewTools = (function (m) {
       m.sketch.textAlign(m.sketch.CENTER)
       m.sketch.text('Loading...', m.sketch.width / 2, 100)
       return
-  }
+    }
 
     m.sketch.image(m.mapImages[map], m.mapOffset.x, m.mapOffset.y)
   }
@@ -149,6 +148,10 @@ var viewTools = (function (m) {
     }
   }
 
+  function getOffset () {
+    return m.mapOffset
+  }
+
   // PRIVATE
 
   function loadImage (filepath) {
@@ -192,6 +195,7 @@ var viewTools = (function (m) {
     drawGraph: drawGraph,
     drawGraphData: drawGraphData,
     drawClicks: drawClicks,
-    increaseOffset: increaseOffset
+    increaseOffset: increaseOffset,
+    getOffset: getOffset
   }
 })({})
