@@ -39,10 +39,10 @@
         <h2 class="title">Adding New Point</h2>
         <p class="description">Using this form you can add a new point to the map.</p>
         <form action="#">
-          <label for="newpointName">name</label><input type="text" id="newpointName">
-          <label for="newpointX">x</label><input type="text" id="newpointX">
-          <label for="newpointY">y</label><input type="text" id="newpointY">
-          <label for="newpoint">radius</label><input type="text" id="newpointRadius">
+          <label class="name" for="newpointName">name</label><input class="name" type="text" id="newpointName">
+          <label class='x' for="newpointX">x</label><input class='x' type="text" id="newpointX">
+          <label class='y' for="newpointY">y</label><input class='y' type="text" id="newpointY">
+          <label class="radius" for="newpoint">radius</label><input class="radius" type="text" id="newpointRadius">
           <button class="next" onclick="controller.addPoint()">Next</button>
           <button class="cancel" onclick="controller.cancelAddPoint()">Cancel</button>
         </form>
