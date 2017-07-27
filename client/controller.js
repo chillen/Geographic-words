@@ -102,7 +102,7 @@ var controller = (function (m) {
     }
 
     s.mouseDragged = function () {
-      if (m.dragging) {
+      if (s.keyIsDown(s.SHIFT) && m.dragging) {
         return
       }
       if ((m.dragging = s.keyIsDown(s.SHIFT))) {
