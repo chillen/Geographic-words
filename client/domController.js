@@ -15,6 +15,14 @@ var domController = (function (m) {
     }
   }
 
+  m.toggleTextSelection = function () {
+    if (document.body.classList.contains('noselect')) {
+      document.body.classList.remove('noselect')
+    } else {
+      document.body.classList.add('noselect')
+    }
+  }
+
   m.get = function (attr) {
     switch (attr) {
       case 'x':

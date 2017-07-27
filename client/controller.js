@@ -102,7 +102,11 @@ var controller = (function (m) {
     }
 
     s.mouseDragged = function () {
+      if (m.dragging) {
+        return
+      }
       if ((m.dragging = s.keyIsDown(s.SHIFT))) {
+        m.dom.toggleTextSelection()
         return
       }
       if (s.mouseX > s.width || s.mouseY > s.height || s.mouseX < 0 || s.mouseY < 0) {
@@ -128,6 +132,7 @@ var controller = (function (m) {
     }
 
     if (!m.sketch.mouseIsPressed) {
+      m.dom.toggleTextSelection()
       return (dragging = false)
     }
 
