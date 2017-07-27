@@ -3,10 +3,13 @@ var domController = (function (m) {
   m.sidebar = document.querySelector('.menu')
   m.main = m.sidebar.querySelector('.call-to-action')
   m.newpoint = m.sidebar.querySelector('.new-point-form')
+  m.newpointwords = m.sidebar.querySelector('.new-point-words')
   m.x = m.newpoint.querySelector('#newpointX')
   m.y = m.newpoint.querySelector('#newpointY')
   m.radius = m.newpoint.querySelector('#newpointRadius')
   m.name = m.newpoint.querySelector('#newpointName')
+  m.keyword = m.newpointwords.querySelector('#newpointKeyword')
+  m.wordlist = m.newpointwords.querySelector('.wordlist')
 
   m.getSize = function () {
     return {
@@ -33,6 +36,8 @@ var domController = (function (m) {
         return getRadius()
       case 'name':
         return getName()
+      case 'keyword':
+        return getKeyword()
     }
   }
 
@@ -46,19 +51,37 @@ var domController = (function (m) {
         return setRadius(val)
       case 'name':
         return setName(val)
+      case 'words':
+        return setWords(val)
     }
   }
 
   m.displayNewPointForm = function () {
     m.clearNewPointForm()
     m.main.style.display = 'none'
+    m.newpointwords.style.display = 'none'
     m.newpoint.style.display = 'block'
   }
 
   m.displayMainForm = function () {
     m.main.style.display = 'block'
     m.newpoint.style.display = 'none'
+    m.newpointwords.style.display = 'none'
     m.clearNewPointForm()
+  }
+
+  m.displayWordSearch = function () {
+    m.main.style.display = 'none'
+    m.newpoint.style.display = 'none'
+    m.newpointwords.style.display = 'block'
+    m.clearNewPointForm()
+    m.clearWordSearch()
+  }
+
+  m.clearWordSearch = function () {
+    while (m.wordlist.firstChild) {
+      m.wordlist.removeChild(m.wordlist.firstChild)
+    }
   }
 
   m.clearNewPointForm = function () {
@@ -84,6 +107,10 @@ var domController = (function (m) {
     return m.name.value
   }
 
+  let getKeyword = function () {
+    return m.keyword.value
+  }
+
   let setX = function (val) {
     m.x.setAttribute('value', val)
     checkDirty()
@@ -106,6 +133,22 @@ var domController = (function (m) {
     m.name.setAttribute('value', val)
     checkDirty()
     return m
+  }
+
+  let setWords = function (list) {
+    if (list.length < 1) {
+      let elem = document.createElement('li')
+      elem.innerHTML = 'No words associated with keyword.'
+      m.wordlist.appendChild(elem)
+    }
+
+    for (let word of list) {
+      let elem = document.createElement('li')
+      elem.innerHTML = word
+      m.wordlist.appendChild(elem)
+    }
+
+    m.wordlist.style.display = 'block'
   }
 
   let checkDirty = function () {

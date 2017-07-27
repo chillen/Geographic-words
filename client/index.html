@@ -45,13 +45,19 @@
           <label class='y' for="newpointY">y</label><input class='y' type="text" id="newpointY">
           <label class="radius" for="newpoint">radius</label><input class="radius" type="text" id="newpointRadius">
           <button class="next" onclick="controller.addPoint();return false;">Next</button>
-          <button class="cancel button-outline" onclick="controller.cancelAddPoint();return false;">Cancel</button>
+          <button class="cancel button-outline" onclick="controller.cancel();return false;">Cancel</button>
         </form>
-        </div>
-      <div class="point-information" style="display: none">
-        <h3>POI Information</h3>
-        <p><strong>Name: </strong><span id="name"></span></p>
-        <p><strong>Coords: </strong><span id="coords"></span></p>
+      </div>
+      <div class="new-point-words" style="display: none">
+        <h2 class="title">Words for Point</h2>
+        <p class="description">Using this form you can add a new point to the map.</p>
+        <form>
+          <label class="keyword" for="newpointKeyword">Search Word</label><input class="keyword" type="text" id="newpointKeyword">
+          <ol class="wordlist" style="display: hidden">
+          </ol>
+          <button class="search" onclick="controller.search();return false;">Search</button>
+          <button class="cancel button-outline" onclick="controller.cancel();return false;">Cancel</button>
+        </form>
       </div>
     </div>
     <div id="sketch">

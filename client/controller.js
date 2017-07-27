@@ -40,12 +40,17 @@ var controller = (function (m) {
     let radius = m.dom.get('radius')
     let name = m.dom.get('name')
     m.model.addPoint(x, y, radius, name)
-    m.dom.displayMainForm()
-    m.dom.clearNewPointForm()
+    m.dom.displayWordSearch()
   }
 
-  function cancelAddPoint () {
+  function cancel () {
     m.dom.displayMainForm()
+  }
+
+  function search () {
+    let key = m.dom.get('keyword')
+    let list = [key, 'one', 'two', 'three', 'four']
+    m.dom.set('words', list)
   }
 
   function resetOffset () {
@@ -167,7 +172,8 @@ var controller = (function (m) {
     initialize: initialize,
     swapMap: swapMap,
     addPoint: addPoint,
-    cancelAddPoint: cancelAddPoint,
-    resetOffset: resetOffset
+    cancel: cancel,
+    resetOffset: resetOffset,
+    search: search
   }
 })({})
