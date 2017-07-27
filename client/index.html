@@ -36,15 +36,17 @@
         </nav>
       </div>
       <div class="new-point-form" style="display: none">
-        <h2>Adding New Point</h2>
-        <p>Using this form you can add a new point to the map.</p>
-        <input type="text" id="x">
-        <input type="text" id="y">
-        <input type="text" id="name">
-        <input type="text" id="radius">
-        <button onclick="controller.addPoint()">Next</button>
-        <button onclick="controller.cancelAddPoint()">Cancel</button>
-      </div>
+        <h2 class="title">Adding New Point</h2>
+        <p class="description">Using this form you can add a new point to the map.</p>
+        <form action="#">
+          <label for="newpointName">name</label><input type="text" id="newpointName">
+          <label for="newpointX">x</label><input type="text" id="newpointX">
+          <label for="newpointY">y</label><input type="text" id="newpointY">
+          <label for="newpoint">radius</label><input type="text" id="newpointRadius">
+          <button class="next" onclick="controller.addPoint()">Next</button>
+          <button class="cancel" onclick="controller.cancelAddPoint()">Cancel</button>
+        </form>
+        </div>
       <div class="point-information" style="display: none">
         <h3>POI Information</h3>
         <p><strong>Name: </strong><span id="name"></span></p>

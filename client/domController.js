@@ -3,10 +3,10 @@ var domController = (function (m) {
   m.sidebar = document.querySelector('.menu')
   m.main = m.sidebar.querySelector('.call-to-action')
   m.newpoint = m.sidebar.querySelector('.new-point-form')
-  m.x = m.newpoint.querySelector('#x')
-  m.y = m.newpoint.querySelector('#y')
-  m.radius = m.newpoint.querySelector('#radius')
-  m.name = m.newpoint.querySelector('#name')
+  m.x = m.newpoint.querySelector('#newpointX')
+  m.y = m.newpoint.querySelector('#newpointY')
+  m.radius = m.newpoint.querySelector('#newpointRadius')
+  m.name = m.newpoint.querySelector('#newpointName')
 
   m.getSize = function () {
     return {
