@@ -29,11 +29,12 @@
         </p>
         <p>Press and hold shift and drag to move the map.</p>
         <p>CTRL+Click anywhere to have the in-map location displayed in console.</p>
-        <nav>
-          <button class="mdl-button" onclick="controller.swapMap('height')">Heightmap</button>
-          <button class="mdl-button" onclick="controller.swapMap('moisture')">Moisture</button>
-          <button class="mdl-button" onclick="controller.swapMap('biome')">Biome</button>
-        </nav>
+        <h3>Controls</h3>
+        <button onclick="controller.resetOffset()">Reset View</button>
+        <h3>Map Views</h3>
+        <button onclick="controller.swapMap('biome')">Biome</button>
+        <button onclick="controller.swapMap('height')">Heightmap</button>
+        <button onclick="controller.swapMap('moisture')">Moisture</button>
       </div>
       <div class="new-point-form" style="display: none">
         <h2 class="title">Adding New Point</h2>

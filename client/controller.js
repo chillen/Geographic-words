@@ -48,6 +48,11 @@ var controller = (function (m) {
     m.dom.displayMainForm()
   }
 
+  function resetOffset () {
+    let offset = m.view.getOffset()
+    m.view.increaseOffset(-offset.x, -offset.y)
+  }
+
   // PRIVATE
 
   function pointsBetween (points) {
@@ -162,6 +167,7 @@ var controller = (function (m) {
     initialize: initialize,
     swapMap: swapMap,
     addPoint: addPoint,
-    cancelAddPoint: cancelAddPoint
+    cancelAddPoint: cancelAddPoint,
+    resetOffset: resetOffset
   }
 })({})
