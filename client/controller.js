@@ -49,7 +49,11 @@ var controller = (function (m) {
 
   function search () {
     let key = m.dom.get('keyword')
-    let list = [key, 'one', 'two', 'three', 'four']
+    let point = m.model.getPoints()[m.model.getPoints().length - 1]
+    let fields = m.model.getFields()
+    let actualFields = fields.filter(field => field.at(point.x, point.y) > 0.01)
+    let names = actualFields.map(field => field.tag)
+    let list = names
     m.dom.set('words', list)
   }
 
