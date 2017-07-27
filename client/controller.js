@@ -141,8 +141,9 @@ var controller = (function (m) {
   }
 
   function getTargetCanvasSize () {
-    let H = document.getElementById('sketch-wrapper').clientHeight
-    let W = document.getElementById('sketch-wrapper').clientWidth
+    let domSize = m.dom.getSize()
+    let H = domSize.height
+    let W = domSize.width
 
     // Just in case of weird timing issues
     H = H > 0 ? H : 1

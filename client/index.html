@@ -3,8 +3,6 @@
 
 <head>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/p5.js"></script>
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
-  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/picomodal/3.0.0/picoModal.min.js"></script>
   <script src="models.js" defer></script>
   <script src="controller.js" defer></script>
@@ -12,76 +10,49 @@
   <script src="modelData.js" defer></script>
   <script src="viewTools.js" defer></script>
   <script src="sketch.js" defer></script>
-  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <!-- CSS Reset -->
+  <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+  <!-- Milligram CSS minified -->
+  <link rel="stylesheet" href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
   <link rel="stylesheet" type="text/css" href="style.css">
-  <style>
-    body {
-      padding: 0;
-      margin: 0;
-    }
-  </style>
 </head>
 
-<body id="body">
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
-    <div class="mdl-layout__drawer" id="menu">
-      <div id="main-view">
-        <span class="mdl-layout-title">Word Associations</span>
-        <p>In this demo, you can explore various influence fields being generated around provided points of interest. Click
-          and drag to examine the values of the field on the top right graph.
+<body>
+  <div class="wrapper">
+    <div class="menu">
+      <div class="call-to-action">
+        <h2>Word Associations</h2>
+        <p>In this demo, you can explore various influence fields being generated around provided points of interest. Click and
+          drag to examine the values of the field on the top right graph.
         </p>
         <p>Press and hold shift and drag to move the map.</p>
         <p>CTRL+Click anywhere to have the in-map location displayed in console.</p>
-        <nav class="mdl-navigation">
+        <nav>
           <button class="mdl-button" onclick="controller.swapMap('height')">Heightmap</button>
           <button class="mdl-button" onclick="controller.swapMap('moisture')">Moisture</button>
           <button class="mdl-button" onclick="controller.swapMap('biome')">Biome</button>
+        </nav>
       </div>
       <div class="new-point-form" style="display: none">
-        <h3>Adding New Point</h3>
+        <h2>Adding New Point</h2>
         <p>Using this form you can add a new point to the map.</p>
-        <form action="#">
-          <div style="width: 40%" pattern="-?[0-9]*(\.[0-9]+)?" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" id="x">
-            <label class="mdl-textfield__label" for="name">x</label>
-            <span class="mdl-textfield__error">Input is not a number!</span>
-          </div>
-          <div style="width: 40%" pattern="-?[0-9]*(\.[0-9]+)?" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" id="y">
-            <label class="mdl-textfield__label" for="name">y</label>
-            <span class="mdl-textfield__error">Input is not a number!</span>
-          </div>
-          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" id="name">
-            <label class="mdl-textfield__label" for="name">Point Name</label>
-          </div>
-          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" id="radius" pattern="-?[0-9]*(\.[0-9]+)?">
-            <label class="mdl-textfield__label" for="radius">Radius of Effect (pixels)</label>
-            <span class="mdl-textfield__error">Input is not a number!</span>
-          </div>
-
-          <button onclick="controller.addPoint()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
-              Next
-            </button>
-          <button onclick="controller.cancelAddPoint()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
-              Cancel
-            </button>
-        </form>
+        <input type="text" id="x">
+        <input type="text" id="y">
+        <input type="text" id="name">
+        <input type="text" id="radius">
+        <button onclick="controller.addPoint()">Next</button>
+        <button onclick="controller.cancelAddPoint()">Cancel</button>
       </div>
       <div class="point-information" style="display: none">
         <h3>POI Information</h3>
         <p><strong>Name: </strong><span id="name"></span></p>
         <p><strong>Coords: </strong><span id="coords"></span></p>
       </div>
-      </nav>
     </div>
-    <main class="mdl-layout__content" id="wrap-wrap">
-      <div class="page-content" id="sketch-wrapper">
-        <div id="sketch">
-        </div>
-      </div>
-    </main>
+    <div id="sketch">
+    </div>
   </div>
   <!-- The below code allows you to use a locally installed livereload -->
   <script>

@@ -1,12 +1,19 @@
 var domController = (function (m) {
 
-  m.sidebar = document.querySelector('#menu')
-  m.main = m.sidebar.querySelector('#main-view')
+  m.sidebar = document.querySelector('.menu')
+  m.main = m.sidebar.querySelector('.call-to-action')
   m.newpoint = m.sidebar.querySelector('.new-point-form')
   m.x = m.newpoint.querySelector('#x')
   m.y = m.newpoint.querySelector('#y')
   m.radius = m.newpoint.querySelector('#radius')
   m.name = m.newpoint.querySelector('#name')
+
+  m.getSize = function () {
+    return {
+      width: document.querySelector('#sketch').clientWidth,
+      height: document.querySelector('#sketch').clientHeight
+    }
+  }
 
   m.get = function (attr) {
     switch (attr) {
