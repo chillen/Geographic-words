@@ -1,5 +1,5 @@
 var controller = (function (m) {
-
+  
   // PUBLIC
   function initialize (sketch, model, view) {
     m.model = model
