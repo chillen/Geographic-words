@@ -1,4 +1,5 @@
 from bottle import route, run, request, static_file, get
+import json
 import wordlogic
 # import wordlogic
 
@@ -19,7 +20,7 @@ import wordlogic
 def searchwords():
     data = request.json
     print wordlogic.search(data)
-    return data
+    return json.dumps(wordlogic.search(data))
 
 # Code to serve the frontend below
 
