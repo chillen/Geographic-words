@@ -136,6 +136,7 @@ var domController = (function (m) {
   }
 
   let setWords = function (list) {
+    m.clearWordSearch()
     if (list.length < 1) {
       let elem = document.createElement('li')
       elem.innerHTML = 'No words associated with keyword.'

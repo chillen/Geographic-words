@@ -52,9 +52,9 @@ var controller = (function (m) {
     let point = m.model.getPoints()[m.model.getPoints().length - 1]
     let fields = m.model.getFields()
     let actualFields = fields.filter(field => field.at(point.x, point.y) > 0.01)
-    let names = actualFields.map(field => field.tag)
-    let list = names
-    m.dom.set('words', list)
+    let request = actualFields.map(field => ({ tag: field.tag, intensity: field.at(point.x, point.y) }))
+    serverWordSearch(request                                                                                                                                                                    , key)
+      .then(list => m.dom.set('words', list))
   }
 
   function resetOffset () {
@@ -63,6 +63,19 @@ var controller = (function (m) {
   }
 
   // PRIVATE
+
+  function serverWordSearch (fields, keyword) {
+    return window.fetch('/',
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({fields: fields, keyword: keyword})
+      })
+      .then(res => res.json())
+  }
 
   function pointsBetween (points) {
     function roundPoint (p) {
