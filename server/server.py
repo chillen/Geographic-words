@@ -1,4 +1,5 @@
 from bottle import route, run, request, static_file, get
+import wordlogic
 # import wordlogic
 
 # Sample code
@@ -17,14 +18,15 @@ from bottle import route, run, request, static_file, get
 @route('/', method="POST")
 def searchwords():
     data = request.json
-    print data['fields'][0]['intensity']
+    print wordlogic.search(data)
     return data
+
+# Code to serve the frontend below
 
 @get('/')
 def homepage():
     return static_file('index.html', '../client/')
 
-# Static Routes
 @get("<filepath:re:.*\.css>")
 def css(filepath):
     return static_file(filepath, root="../client")
