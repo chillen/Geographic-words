@@ -1,20 +1,6 @@
 from bottle import route, run, request, static_file, get
 import json
 import wordlogic
-# import wordlogic
-
-# Sample code
-# fetch("/",
-# {
-#     headers: {
-#       'Accept': 'application/json',
-#       'Content-Type': 'application/json'
-#     },
-#     method: "POST",
-#     body: JSON.stringify({fields: [{tag: 'dracula', intensity: 0.69}], keyword: 'blood'})
-# })
-# .then(res => res.json())
-# .then(console.log)
 
 @route('/', method="POST")
 def searchwords():
