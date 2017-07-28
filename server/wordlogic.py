@@ -1,11 +1,6 @@
 import sys  
 import csv
 import random
-#from gensim.models.keyedvectors import KeyedVectors
-# from gensim.models import word2vec
-
-# # reload(sys)  
-# # sys.setdefaultencoding('utf8')
 
 # # Import the Warriner affective norms dataset
 # # http://crr.ugent.be/archives/1003
@@ -15,22 +10,11 @@ warriner = {}
 vecs = {}
 models = 'models/'
 source_material = 'material/'
+
 with open(models+'warriner.csv', mode='r') as infile:
     reader = csv.reader(infile)
     next(reader)
     warriner = {rows[1]: {'valence': (float)(rows[2]), 'arousal': (float)(rows[5]), 'dominance': (float)(rows[8])} for rows in reader}
-
-
-# # Get vector models for every title
-# for title in titles:
-#     sentences = word2vec.Text8Corpus(source_material + title + ".txt")
-#     vecs[title] = word2vec.Word2Vec(sentences, size=200, hs=1, negative=0)
-
-# def search_word(model, word, dissimilarity=100):
-#     return [w for w in model.similar_by_word(word, dissimilarity)]
-
-# def search_word_affective(model, word, dissimilarity=100, prop='arousal', low=0, high=10):
-#     return sorted([(warriner[w[0]][prop], w[0], w[1]) for w in model.similar_by_word(word, dissimilarity) if w[0] in warriner and high >= warriner[w[0]][prop] >= low], reverse=True)
 
 def getNTitles(fields, num):
     N = len(titles)
