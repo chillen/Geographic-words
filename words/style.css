@@ -4,11 +4,11 @@ body {
 }
 .wrapper {
     display: grid;
-    grid-template-columns: 30% auto 30%;
+    grid-template-columns: 1fr auto 1fr;
     grid-template-areas:
         ". ul ."
         ". form .";
-        grid-auto-rows: minmax(200px, auto);
+    grid-template-rows: 1fr;
 }
 
 .search-form {
@@ -25,9 +25,13 @@ ul {
     list-style: none;
     grid-area: ul;
     text-align: center;
-    margin-top: 10px;
+    margin-top: 10%;
 }
 
 ul button {
-    width: auto;
+    width: 100%;
+}
+
+ul li {
+    margin: 0px;
 }
