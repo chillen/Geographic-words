@@ -21,7 +21,7 @@ function setupLists(words) {
     for (let word of words) {
         let li = document.createElement('li')
         let btn = document.createElement('button')
-        btn.innerHTML = word[1]
+        btn.innerHTML = word
         li.appendChild(btn)
         ul.appendChild(li)
     }

@@ -48,10 +48,17 @@ class WordTrackModel:
     english = set(json.load(open('data/english.json', 'r')))
     totalworks = 0
     df = Counter()
+    warriner = None
+
+    with open('models/warriner.csv', mode='r') as infile:
+        reader = csv.reader(infile)
+        next(reader)
+        warriner = {rows[1]: {'valence': (float)(rows[2]), 'arousal': (float)(rows[5]), 'dominance': (float)(rows[8])} for rows in reader}
     
-    def __init__(self, name, f, data={}):
+    def __init__(self, name, f, data={}, filterwarriner=False):
         self.name = name
         self.f = f
+        self.filterwarriner = filterwarriner
         self.text = self.loadfile(f)
         self.words = {}
         self.tracked = set([0])
@@ -77,10 +84,20 @@ class WordTrackModel:
             line =  re.sub("[^a-zA-Z]", " ", line)
             line = line.lower()
             text.extend(line.split())
-        text = " ".join([w for w in text if w not in self.stops and w in self.english])
+        text = " ".join([w for w in text if self.suitableWord(w)])
         self.df.update(set(text.split()))
         return zlib.compress(text)
     
+    def suitableWord(self, word):
+        if word in self.stops:
+            return False
+        if word not in self.english:
+            return False
+        if self.filterwarriner:
+            if word in WordTrackModel.warriner and WordTrackModel.warriner[word]['arousal'] < 4:
+                return False
+        return True
+
     def wordlist(self):
         return zlib.decompress(self.text).split()
     
@@ -141,19 +158,21 @@ class WordTrackModel:
         return sorted(words, reverse=True)
 
 class KnowledgeBase:
-    def __init__(self, debugging=False):
+    def __init__(self, debugging=False, maxmodels=-1, warriner=False):
         self.debugging = debugging
-        self.models = self.loadModels()
+        self.models = self.loadModels(maxmodels=maxmodels, warriner=warriner)
         
-    def loadModels(self):
+    def loadModels(self, maxmodels=-1, warriner=False):
         models = {}
-        WordTrackModel.df = Counter() # This is to reset it for notebook's sake
-        WordTrackModel.totalworks = 0 # This is to reset it for notebook's sake
-        for i, f in enumerate(glob.glob('data/*.txt')):
+        WordTrackModel.df = Counter()
+        WordTrackModel.totalworks = 0
+        files = glob.glob('data/*.txt')
+        maxmodels = maxmodels if maxmodels >0 else len(files)
+        for i, f in enumerate(files[:maxmodels]):
             data = self.getGutenbergMeta(f)
             if self.debugging:
                 print '['+str(i)+'] Currently processing ', data, '...'
-            models[data['title']] = WordTrackModel(data['title'], f, data)
+            models[data['title']] = WordTrackModel(data['title'], f, data, warriner)
             models[data['title']].distTrack(3)
         return models
     def getGutenbergMeta(self, f):
@@ -173,7 +192,7 @@ class KnowledgeBase:
         similarclusters = []
         for model in models:
             clusters[model.name] = set([w[0] for w in model.sumNear(search, near, limit, orderby=orderby)])
-            similarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarilarclusters = []
+            similarclusters = []
             for cluster1 in clusters:
                 for cluster2 in clusters:
                     if cluster1 != cluster2:
@@ -230,10 +249,10 @@ class KnowledgeBase:
         return wordsets
 
 
-# kb = KnowledgeBase()
+kb = KnowledgeBase(maxmodels=10, warriner=True)
+# USE SESSIONS
 
 def search(json):
     fields = json['fields']
     keywords = json['keyword']
-    kb = {}
-    return kb.most_similar_to(keywords)
+    return [m[1] for m in kb.most_similar_to(keywords)][:10]
