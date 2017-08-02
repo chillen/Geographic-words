@@ -1,0 +1,52 @@
+body {
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+}
+.wrapper {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    grid-auto-rows: minmax(200px, auto);
+    width: 100%;
+    height: 100%;
+    vertical-align: top;
+    overflow: hidden; /*Cheap hack, I know. About 19px over each side  */
+}
+
+.menu {
+    padding: 5px;   
+}
+
+.new-point-form form {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr 3fr 1fr 3fr;
+    grid-template-rows: auto;
+    grid-template-areas: 
+        "labelname name name name name name"
+        "labelx x labely y labelradius radius"
+        "cancel cancel next next next next";
+    padding: 10px;
+    grid-gap: 20px;
+}
+
+input.x { grid-area: x; }
+input.y { grid-area: y; }
+input.name { grid-area: name; }
+input.radius { grid-area: radius; }
+button.next { grid-area: next; }
+button.cancel { grid-area: cancel; }
+
+label.x { grid-area: labelx; }
+label.y { grid-area: labely; }
+label.name { grid-area: labelname; }
+label.radius { grid-area: labelradius; }
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}

@@ -1,29 +1,45 @@
 from bottle import route, run, request, static_file, get
 import json
-import wordlogic
+import wordclustering
 
 @route('/', method="POST")
 def searchwords():
     data = request.json
-    print wordlogic.search(data)
-    return json.dumps(wordlogic.search(data))
+    print wordclustering.search(data)
+    return json.dumps(wordclustering.search(data))
 
 # Code to serve the frontend below
 
+@get('/map')
+def map():
+    return static_file('index.html', '../map')
+
+@get('/words')
+def words():
+    return static_file('index.html', '../words')
+
 @get('/')
 def homepage():
-    return static_file('index.html', '../client/')
+    return static_file('index.html', '../map')
 
-@get("<filepath:re:.*\.css>")
-def css(filepath):
-    return static_file(filepath, root="../client")
+@get("/map/<filepath:re:.*\.css>")
+def mapcss(filepath):
+    return static_file(filepath, root="../map")
+
+@get("/words/<filepath:re:.*\.css>")
+def wordscss(filepath):
+    return static_file(filepath, root="../words")
 
 @get("/data/<filepath:re:.*\.(jpg|png|gif|ico|svg)>")
-def img(filepath):
-    return static_file(filepath, root="../client/data")
+def mapimg(filepath):
+    return static_file(filepath, root="../map/data")
 
-@get("<filepath:re:.*\.js>")
-def js(filepath):
-    return static_file(filepath, root="../client")
+@get("/map/<filepath:re:.*\.js>")
+def mapjs(filepath):
+    return static_file(filepath, root="../map")
+
+@get("/words/<filepath:re:.*\.js>")
+def wordsjs(filepath):
+    return static_file(filepath, root="../words")
 
 run(host='localhost', port=8080)

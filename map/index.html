@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.11/p5.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/picomodal/3.0.0/picoModal.min.js"></script>
+  <script src="map/models.js" defer></script>
+  <script src="map/controller.js" defer></script>
+  <script src="map/domController.js" defer></script>
+  <script src="map/modelData.js" defer></script>
+  <script src="map/viewTools.js" defer></script>
+  <script src="map/sketch.js" defer></script>
+  <!-- Google Fonts -->
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <!-- CSS Reset -->
+  <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+  <!-- Milligram CSS minified -->
+  <link rel="stylesheet" href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
+  <link rel="stylesheet" type="text/css" href="map/style.css">
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="menu">
+      <div class="call-to-action">
+        <h2>Word Associations</h2>
+        <p>In this demo, you can explore various influence fields being generated around provided points of interest. Click and
+          drag to examine the values of the field on the top right graph.
+        </p>
+        <p>Press and hold shift and drag to move the map.</p>
+        <p>CTRL+Click anywhere to have the in-map location displayed in console.</p>
+        <h3>Controls</h3>
+        <button onclick="controller.resetOffset()">Reset View</button>
+        <h3>Map Views</h3>
+        <button onclick="controller.swapMap('biome')">Biome</button>
+        <button onclick="controller.swapMap('height')">Heightmap</button>
+        <button onclick="controller.swapMap('moisture')">Moisture</button>
+      </div>
+      <div class="new-point-form" style="display: none">
+        <h2 class="title">Adding New Point</h2>
+        <p class="description">Using this form you can add a new point to the map.</p>
+        <form>
+          <label class="name" for="newpointName">name</label><input class="name" type="text" id="newpointName">
+          <label class='x' for="newpointX">x</label><input class='x' type="text" id="newpointX">
+          <label class='y' for="newpointY">y</label><input class='y' type="text" id="newpointY">
+          <label class="radius" for="newpoint">radius</label><input class="radius" type="text" id="newpointRadius">
+          <button class="next" onclick="controller.addPoint();return false;">Next</button>
+          <button class="cancel button-outline" onclick="controller.cancel();return false;">Cancel</button>
+        </form>
+      </div>
+      <div class="new-point-words" style="display: none">
+        <h2 class="title">Words for Point</h2>
+        <p class="description">Using this form you can add a new point to the map.</p>
+        <form>
+          <label class="keyword" for="newpointKeyword">Search Word</label><input class="keyword" type="text" id="newpointKeyword">
+          <ol class="wordlist" style="display: hidden">
+          </ol>
+          <button class="search" onclick="controller.search();return false;">Search</button>
+          <button class="cancel button-outline" onclick="controller.cancel();return false;">Cancel</button>
+        </form>
+      </div>
+    </div>
+    <div id="sketch">
+    </div>
+  </div>
+  <!-- The below code allows you to use a locally installed livereload -->
+  <script>
+    document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] +
+      ':35729/livereload.js?snipver=1"></' + 'script>')
+  </script>
+</body>
+
+</html>
