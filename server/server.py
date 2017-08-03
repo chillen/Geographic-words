@@ -1,12 +1,12 @@
 from bottle import route, run, request, static_file, get
 import json
-import wordclustering
+import serverlogic
 
 @route('/', method="POST")
 def searchwords():
     data = request.json
-    print wordclustering.search(data)
-    return json.dumps(wordclustering.search(data))
+    output = serverlogic.search(data)
+    return json.dumps(output)
 
 # Code to serve the frontend below
 

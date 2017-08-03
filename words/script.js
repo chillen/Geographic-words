@@ -7,7 +7,7 @@ function startExploring() {
           'Content-Type': 'application/json'
         },
         method: 'POST',
-        body: JSON.stringify({fields: {}, keyword: keywords})
+        body: JSON.stringify({fields: {}, keywords: keywords})
       })
       .then(res => res.json())
       .then(words => setupLists(words))
