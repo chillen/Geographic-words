@@ -28,10 +28,36 @@ ul {
     margin-top: 10%;
 }
 
+ul li {
+    margin: 0px;
+}
+
 ul button {
     width: 100%;
 }
 
-ul li {
-    margin: 0px;
+button.word.accept {
+    background-color: #484;  
+    border: 0;  
+}
+
+button.word.accept:hover {
+    background-color: #864;  
+}
+
+button.word.reject {
+    background-color: #844; 
+    border: 0;   
+}
+
+button.word.reject:hover {
+    background-color: #648;
+}
+
+button.word:hover {
+    background-color: #486;
+}
+
+button.word {
+    transition: background-color 1s;
 }

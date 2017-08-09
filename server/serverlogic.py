@@ -2,7 +2,7 @@ import wordtrackingmodels as models
 import wordlogic as logic
 
 collection = models.WordModelCollection()
-for model in logic.loadModels(maxmodels=10):
+for model in logic.loadModels():
     collection.updateModel(model['text'], model['meta'])
 
 def getDebugField(titles):

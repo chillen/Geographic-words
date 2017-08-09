@@ -161,7 +161,7 @@ def search(json, collection, session):
     cleaned = {r[1]: r[0] for r in similarTitles}
     field = getFieldFromTitles(cleaned, collection)
     titles = getNTitles(field, 5)
-    response = []
+    response = set()
 
     for _ in range(100):
         for title in titles:
@@ -171,15 +171,14 @@ def search(json, collection, session):
                 words = [(w, model.getWord(w).getWeight()) for w in words]
                 words = sorted(words, key=lambda x: x[1], reverse=True)[:10]
                 if len(words) > 0:
-                    if word not in response:
-                        response.append(random.choice(words)[0])
-                        if len(response) >= 10: 
-                            break
+                    response.add(random.choice(words)[0])
+                    if len(response) >= 10: 
+                        break
             if len(response) >= 10: 
                 break
         if len(response) >= 10: 
             break
-    return response
+    return list(response)
 
 def getFieldFromTitles(works, collection):
     """Return a field given a set of titles"""
