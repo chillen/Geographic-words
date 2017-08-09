@@ -4,6 +4,7 @@ import csv
 import re
 import glob
 import random
+from pprint import pprint
 import math
 from collections import Counter, defaultdict
 
@@ -156,10 +157,28 @@ def search(json, collection, session):
     
     models = collection.getModels()
     
-    response = modelsMostSimilarToTerms(models, keywords)
-    cleaned = {r[1]: r[0] for r in response}
+    similarTitles = modelsMostSimilarToTerms(models, keywords)
+    cleaned = {r[1]: r[0] for r in similarTitles}
     field = getFieldFromTitles(cleaned, collection)
-    response = getNTitles(field, 10)
+    titles = getNTitles(field, 5)
+    response = []
+
+    for _ in range(100):
+        for title in titles:
+            model = models[title]
+            for word in keywords:
+                words = model.getNearbyWordsInRange(word, 1,2)
+                words = [(w, model.getWord(w).getWeight()) for w in words]
+                words = sorted(words, key=lambda x: x[1], reverse=True)[:10]
+                if len(words) > 0:
+                    if word not in response:
+                        response.append(random.choice(words)[0])
+                        if len(response) >= 10: 
+                            break
+            if len(response) >= 10: 
+                break
+        if len(response) >= 10: 
+            break
     return response
 
 def getFieldFromTitles(works, collection):
