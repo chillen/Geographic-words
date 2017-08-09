@@ -1,11 +1,28 @@
-from bottle import route, run, request, static_file, get
+from bottle import route, run, request, static_file, get, app
+from beaker.middleware import SessionMiddleware
 import json
 import serverlogic
+
+session_opts = {
+    'session.type': 'file',
+    'session.cookie_expires': 300,
+    'session.data_dir': './session_data',
+    'session.auto': True
+}
 
 @route('/', method="POST")
 def searchwords():
     data = request.json
-    output = serverlogic.search(data)
+    session = request.environ.get('beaker.session')
+    output = serverlogic.search(data, session)
+    return json.dumps(output)
+
+@route('/debugfield', method="GET")
+def debugfield():
+    data = request.json
+    if title not in data:
+        return json.dumps([])
+    output = serverlogic.getDebugField(title)
     return json.dumps(output)
 
 # Code to serve the frontend below
@@ -42,4 +59,7 @@ def mapjs(filepath):
 def wordsjs(filepath):
     return static_file(filepath, root="../words")
 
-run(host='localhost', port=8080)
+app = SessionMiddleware(app(), session_opts)
+
+
+run(app=app)

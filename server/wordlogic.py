@@ -3,6 +3,7 @@ import json
 import csv
 import re
 import glob
+import random
 import math
 from collections import Counter, defaultdict
 
@@ -143,7 +144,7 @@ warriner = loadWarriner()
 stops = set(json.load(open('data/nltkstopwords.json', 'r')))
 english = set(json.load(open('data/english.json', 'r')))  
 
-def search(json, collection):
+def search(json, collection, session):
     data = defaultdict(list)
     for k in json:
         data[k] = json[k]
@@ -152,39 +153,42 @@ def search(json, collection):
     accept = data['accept']
     reject = data['reject']
     blacklist = data['blacklist']
+    
     models = collection.getModels()
     
     response = modelsMostSimilarToTerms(models, keywords)
-    response = [d[1] for d in response]
-    print "test"
+    cleaned = {r[1]: r[0] for r in response}
+    field = getFieldFromTitles(cleaned, collection)
+    response = getNTitles(field, 10)
     return response
 
-# def getNTitles(fields, num):
-#     N = len(titles)
-#     maxval = 0
-#     results = []
-#     inputTags = [field['tag'] for field in fields]
-#     weights = [{'tag': title, 'intensity': float(1)/N} for title in titles if title not in inputTags]
-#     for field in fields:
-#         increasedField = {'tag': field['tag'], 'intensity': float(1)/N + field['intensity']}
-#         weights.append(increasedField)
-#     weights = sorted(weights, key=lambda field: field['intensity'])
-#     for field in weights: 
-#         maxval += float(field['intensity'])
-#     for i in range(num):
-#         results.append(weighted_rng(weights, maxval))
-#     return results
+def getFieldFromTitles(works, collection):
+    """Return a field given a set of titles"""
+    field = {}
+    titles = works.keys()
+    for model in collection.getModels():
+        strength = 1
+        if model in titles:
+            strength += works[model]
+        field[model] = strength
+    return field
 
-# # given fields, returns one based on prob. All start equal
-# def weighted_rng(fields, maxval=0):
-#     if maxval == 0:
-#         for field in fields: 
-#             maxval += float(field['intensity'])
-#     rng = random.uniform(0, maxval)
-#     curr = 0
-#     for field in fields:
-#         curr += float(field['intensity'])
-#         if curr > rng:
-#             return field['tag']
+def getNTitles(works, num):
+    N = len(works)
+    maxval = sum(works.values())
+    results = []
+    for _ in range(num):
+        results.append(weighted_rng(works, maxval))
+    return results
 
-#     return fields[-1]['tag']
+# given fields, returns one based on prob. All start equal
+def weighted_rng(works, maxval=0):
+    if maxval == 0:
+        maxval = sum(works.values())
+    rng = random.uniform(0, maxval)
+    curr = 0
+    for title in works:
+        curr += float(works[title])
+        if curr > rng:
+            return title
+    return 'ERR'
