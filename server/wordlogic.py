@@ -5,6 +5,7 @@ import re
 import glob
 import random
 from pprint import pprint
+import operator
 import math
 from collections import Counter, defaultdict
 
@@ -145,24 +146,65 @@ warriner = loadWarriner()
 stops = set(json.load(open('data/nltkstopwords.json', 'r')))
 english = set(json.load(open('data/english.json', 'r')))  
 
-def search(json, collection, session):
-    data = defaultdict(list)
+def nextWords(json, collection ,session):
+    request = defaultdict(list)
     for k in json:
-        data[k] = json[k]
-    fields = data['fields']
-    keywords = data['keywords']
-    accept = data['accept']
-    reject = data['reject']
-    blacklist = data['blacklist']
+        request[k] = json[k]
+    blacklist = request['blacklist']
+    accept = request['accept']
+    reject = request['reject']
     
+    # Update words in the used list, so we can keep track of
+    # Any used up words to avoid sending back and also
+    # Potentially find clusters among accepted words.
+    for word in accept:
+        session['used'][word] = 'ACCEPT'
+    for word in reject:
+        session['used'][word] = 'REJECT'
+
+    # Given the words they accepted, add one to every model which
+    # Contains those words in the top 200 most important terms
+    
+    for title in collection.getModels():
+        model = collection.getModels()[title]
+        for word in accept:
+            if model.getWord(word):
+                session['field'][title] += math.log(model.getWord(word).getWeight())
+        
+        for word in reject:
+            if model.getWord(word):
+                session['field'][title] -= math.log(model.getWord(word).getWeight())
+
+    response = set()
+    field = session['field']
+    titles = getNTitles(field, 10)
+    for title in titles:
+        important = collection.getModel(title).getMostImportant()[:50]
+        for _ in range(100):
+            word = random.choice(important)[1]
+            if word not in session['used']:
+                response.add(word)
+                break
+
+    for word in response:
+        session['used'][word] = 'PASS'
+    pprint(sorted(field.items(), key=operator.itemgetter(1), reverse=True)[:5])
+    return {'response': list(response), 'session':  session}
+
+def search(json, collection, session):
+    request = defaultdict(list)
+    for k in json:
+        request[k] = json[k]
+    keywords = request['keywords']
+
     models = collection.getModels()
-    
+
     similarTitles = modelsMostSimilarToTerms(models, keywords)
     cleaned = {r[1]: r[0] for r in similarTitles}
     field = getFieldFromTitles(cleaned, collection)
-    titles = getNTitles(field, 5)
+    titles = getNTitles(field, 10)
     response = set()
-
+    
     for _ in range(100):
         for title in titles:
             model = models[title]
@@ -178,7 +220,10 @@ def search(json, collection, session):
                 break
         if len(response) >= 10: 
             break
-    return list(response)
+
+    session['field'] = field
+    session['used'] = {word: 'PASS' for word in response}
+    return {'response': list(response), 'session':  session}
 
 def getFieldFromTitles(works, collection):
     """Return a field given a set of titles"""
@@ -194,16 +239,19 @@ def getFieldFromTitles(works, collection):
 def getNTitles(works, num):
     N = len(works)
     maxval = sum(works.values())
+    minval = min(works.values())
     results = []
     for _ in range(num):
-        results.append(weighted_rng(works, maxval))
+        results.append(weighted_rng(works, minval, maxval))
     return results
 
 # given fields, returns one based on prob. All start equal
-def weighted_rng(works, maxval=0):
+def weighted_rng(works, minval=999999, maxval=0):
     if maxval == 0:
         maxval = sum(works.values())
-    rng = random.uniform(0, maxval)
+    if minval == 999999:
+        maxval = min(works.values())
+    rng = random.uniform(minval, maxval)
     curr = 0
     for title in works:
         curr += float(works[title])

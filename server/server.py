@@ -1,29 +1,39 @@
-from bottle import route, run, request, static_file, get, app
+from bottle import route, run, request, static_file, get, app, hook, post
 from beaker.middleware import SessionMiddleware
 import json
 import serverlogic
 
 session_opts = {
     'session.type': 'file',
-    'session.cookie_expires': 300,
-    'session.data_dir': './session_data',
+    'session.data_dir': './session_data/',
     'session.auto': True
 }
 
-@route('/', method="POST")
+app = SessionMiddleware(app(), session_opts)
+
+@hook('before_request')
+def setup_request():
+    request.session = request.environ['beaker.session']
+
+@post('/next')
+def nextwords():
+    data = request.json
+    output = serverlogic.nextWords(data, request.session)
+    response = output['response']
+    session = output['session']
+    request.session.update(session)
+    request.session.save()
+    return json.dumps(response)
+
+@post('/search')
 def searchwords():
     data = request.json
-    session = request.environ.get('beaker.session')
-    output = serverlogic.search(data, session)
-    return json.dumps(output)
-
-@route('/debugfield', method="GET")
-def debugfield():
-    data = request.json
-    if title not in data:
-        return json.dumps([])
-    output = serverlogic.getDebugField(title)
-    return json.dumps(output)
+    output = serverlogic.search(data, request.session)
+    response = output['response']
+    session = output['session']
+    request.session.update(session)
+    request.session.save()
+    return json.dumps(response)
 
 # Code to serve the frontend below
 
@@ -33,6 +43,7 @@ def map():
 
 @get('/words')
 def words():
+    request.session.save()
     return static_file('index.html', '../words')
 
 @get('/')
@@ -58,8 +69,5 @@ def mapjs(filepath):
 @get("/words/<filepath:re:.*\.js>")
 def wordsjs(filepath):
     return static_file(filepath, root="../words")
-
-app = SessionMiddleware(app(), session_opts)
-
 
 run(app=app)
