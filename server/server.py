@@ -10,6 +10,7 @@ session_opts = {
 }
 
 app = SessionMiddleware(app(), session_opts)
+serverlogic.init()
 
 @hook('before_request')
 def setup_request():

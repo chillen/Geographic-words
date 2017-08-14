@@ -9,13 +9,14 @@ import operator
 import math
 from collections import Counter, defaultdict
 
-def loadFile(f):
-    lines = []
-    text = []
+def loadFile(f, textblob):
+    TextBlob, Word = textblob
     with open(f, mode='r') as infile:
         lines = infile.readlines()
     started = False
     ended = False
+    newlines = []
+    text = []
     for line in lines:
         if not started:
             if '*** START' in line or '***START' in line:
@@ -23,16 +24,20 @@ def loadFile(f):
             continue
         if '*** END' in line or '***END' in line:
             break
-        line = line.strip('\n')
-        line = unicode(line, "ascii", errors="ignore")
-        line =  re.sub("[^a-zA-Z]", " ", line)
-        line = line.lower()
-        text.extend(line.split())
-    text = " ".join([w for w in text if suitableWord(w)])
+        newlines.append(line)
+    newlines = '\n'.join(newlines)
+    blob = TextBlob(unicode(newlines, "ascii", errors="ignore"))
+    for word in blob.tags:
+        if suitableWord(word):
+            text.append(Word(word[0].lower()).lemmatize())
+    text = " ".join(text)
     return text
-
 def suitableWord(word):
-    if len(word) < 2:
+    badtags = ['PRP$','W', 'DT', 'RP', 'FW', 'POS', 'TO', 'PRP', 'NNP', 'CC', 'PDT', 'CD', 'EX', 'IN', 'MD', 'NNPS', 'UH']
+    word, tag = word
+    if tag in badtags:
+        return False
+    if len(word) <= 2:
         return False
     if word in stops:
         return False
@@ -40,6 +45,7 @@ def suitableWord(word):
         return False
     if word in warriner and warriner[word]['arousal'] < 4:
         return False
+    
     return True
 
 def dbg(*message):
@@ -49,14 +55,14 @@ def dbg(*message):
     message = [str(m) for m in message]
     print '  [DBG] ', ''.join(message)
 
-def loadModels(maxmodels=-1):
+def loadModels(textblob, maxmodels=-1):
     models = []
     files = glob.glob('data/*.txt')
     maxmodels = maxmodels if maxmodels >0 else len(files)
     for i, f in enumerate(files[:maxmodels]):
         meta = getGutenbergMeta(f)
         dbg( '['+str(i)+'] Currently processing ', meta['title'], '...')
-        models.append({'text': loadFile(f), 'meta': meta})
+        models.append({'text': loadFile(f, textblob), 'meta': meta})
     return models
 
 def loadWarriner():
@@ -141,7 +147,7 @@ def findCommonWordsInClusters(models, dist_away=2, exclusive=True, join='union')
             del wordsets[word]
     return wordsets
 
-debugging = False
+debugging = True
 warriner = loadWarriner()
 stops = set(json.load(open('data/nltkstopwords.json', 'r')))
 english = set(json.load(open('data/english.json', 'r')))  
@@ -161,7 +167,12 @@ def nextWords(json, collection ,session):
         session['used'][word] = 'ACCEPT'
     for word in reject:
         session['used'][word] = 'REJECT'
+        
+    accepted = set([w for w in session['used'] if session['used'][w] == 'ACCEPT'])
+    rejected = set([w for w in session['used'] if session['used'][w] == 'REJECT'])
+    used = set([w for word in session['used']])
 
+    # UPDATE THE FIELD
     # Given the words they accepted, add one to every model which
     # Contains those words in the top 200 most important terms
     
@@ -169,23 +180,57 @@ def nextWords(json, collection ,session):
         model = collection.getModels()[title]
         for word in accept:
             if model.getWord(word):
-                session['field'][title] += math.log(model.getWord(word).getWeight())
+                if model.getWord(word).getWeight() > 0:
+                    session['field'][title] += math.log(model.getWord(word).getWeight())
         
         for word in reject:
             if model.getWord(word):
-                session['field'][title] -= math.log(model.getWord(word).getWeight())
+                if model.getWord(word).getWeight() > 0:
+                    session['field'][title] -= math.log(model.getWord(word).getWeight())
 
     response = set()
     field = session['field']
-    titles = getNTitles(field, 10)
-    for title in titles:
-        important = collection.getModel(title).getMostImportant()[:50]
-        for _ in range(100):
-            word = random.choice(important)[1]
-            if word not in session['used']:
-                response.add(word)
+    num_responses = 10
+    
+    # FIND NEW WORDS
+    # Pick a title at random, using the weights in the field
+    # For every accepted word, get words nearby as long as near words haven't
+    # been rejected
+    # Add a random word from that list
+    for _ in range(1000):
+        title = getNTitles(field, 1)[0]
+        wordpool = []
+        for word in accepted:
+            bad = False
+            nearby = collection.getModel(title).getWordsNear(word, 1)
+            for rejection in rejected:
+                if rejection in nearby:
+                    bad = True
+                    break
+            if bad:
                 break
-
+            for word in nearby:
+                for _ in range(nearby[word]):
+                    wordpool.append(word)
+        if len(wordpool) > 0:
+            # Try a few times before timing out
+            wordpool = [w for w in wordpool if w not in used]
+            if len(wordpool) > 0:
+                response.add(random.choice(wordpool))
+        if len(response) == num_responses:
+            break
+    for _ in range(1000):
+        gap = num_responses - len(response)
+        titles = getNTitles(field, gap)
+        for title in titles:
+            important = collection.getModel(title).getMostImportant()
+            important = [ w[1] for w in important ][:100]
+            important = [w for w in important if w not in used]
+            if len(important) > 0:
+                word = random.choice(important)
+        if len(response) == num_responses:
+            break
+            
     for word in response:
         session['used'][word] = 'PASS'
     pprint(sorted(field.items(), key=operator.itemgetter(1), reverse=True)[:5])
@@ -232,7 +277,7 @@ def getFieldFromTitles(works, collection):
     for model in collection.getModels():
         strength = 1
         if model in titles:
-            strength += works[model]
+            strength += math.log(works[model])
         field[model] = strength
     return field
 

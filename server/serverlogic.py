@@ -1,10 +1,15 @@
 import wordtrackingmodels as models
 import wordlogic as logic
+from textblob import TextBlob, Word
 
-collection = models.WordModelCollection()
-for model in logic.loadModels():
-    collection.updateModel(model['text'], model['meta'])
+collection = None
 
+def init():
+    global collection
+    collection = models.WordModelCollection()
+    for model in logic.loadModels((TextBlob, Word)):
+        collection.updateModel(model['text'], model['meta'])
+        
 def getDebugField(titles):
     """Return a field given a set of titles"""
     return logic.getFieldFromTitles(titles, collection)
